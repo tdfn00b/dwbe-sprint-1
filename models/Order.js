@@ -1,5 +1,4 @@
-//Creación de lista de datos
-let orderList = []
+const {productList} = require('./Product')
 
 class Order {
     constructor(user, paymentMethod, address) {
@@ -24,19 +23,18 @@ class Order {
 
     setStatus(user, newStatus){
         if (this.status != newStatus){
-            if (user.getPrivileges() >= 2 || (user.getPrivileges() == 1 && newStatus < 2)) {
+            if (user.isAdmin() || (newStatus < 2)) {
                 this.status = newStatus;
-            } else if (user.getPrivileges() == 1 && newStatus > 2) {
+            } else if (!user.isAdmin() && newStatus > 2) {
                 console.log('El usuario no tiene permisos para acceder a esta propiedad')
             } 
         } else {
-            console.log('El estado del pedido es idéntico al estado propuesto.')
+            console.log(`El pedido ya está ${newStatus}`)
         }
     }
-    /*
+
     addProduct(productNumber, qty){
         let product = productList.find(products => products.productNumber == productNumber);
-
         if (qty != 0){
             for (let i = 1; i <= qty; i++){
                 this.orderProducts.push(product)
@@ -44,14 +42,6 @@ class Order {
         }
         this.setPrice()
     }
-    */
-
-    addProduct(productNumber, qty){
-        let product = productList.find(products => products.productNumber == productNumber);
-        let productArray = [product, qty]
-        this.orderProducts.push(productArray)
-        this.setPrice()
-        }
 
     removeProduct(productNumber, qty){
         productIndex = this.orderProducts.findIndex(productInList => productInList[0].getProductNumber() == productNumber)
@@ -72,5 +62,7 @@ class Order {
         return userOrderList
     }
 }
+
+let orderList = []
 
 module.exports = {Order, orderList};

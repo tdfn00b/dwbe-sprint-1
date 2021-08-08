@@ -1,5 +1,3 @@
-let productList = []
-
 class Product {
     constructor(name, desc, price, stock) {
         this.productNumber = productList.length + 1;
@@ -25,7 +23,8 @@ class Product {
     getPrice(){
         return this.price;
     }
-
 }
+
+let productList = []
 
 module.exports = {Product, productList};

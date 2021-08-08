@@ -1,5 +1,3 @@
-let userList = []
-
 class User {
     constructor(username, pass, full_name, phone_number, email, address) {
         this.username = username;
@@ -11,16 +9,20 @@ class User {
         this.admin = false;
         this.deleted = false;
     }
-    //privilegios 1 = usuario, 2 = manager, 3 = admin
-    privilege = 1
-    //Cambiar privilegios del usuario
-    setPrivileges(id) {
-        this.privilege = id;
+    
+    setAdmin(bool) {
+        this.admin = bool;
     }
 
-    getPrivileges(){
+    isAdmin(){
         return this.privilege;
     }
+
+    deleteUser(){
+        this.deleted = true
+    }
 }
+
+let userList = []
 
 module.exports = {User, userList};

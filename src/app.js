@@ -1,3 +1,6 @@
+//Importación de configuración para inciar el servidor
+const config = require('../config')
+
 //Importación de módulos
 const express = require('express');
 const morgan = require('morgan');
@@ -16,14 +19,17 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 */
 
-// Importación de clases, middlewares y ¿base de datos?
+// Importación de clases, middlewares y listas.
 const {User} = require('../models/User')
 const {Product} = require('../models/Product')
 const {Order} = require('../models/Order')
 let {isLoggedIn, orderStatus, hasPrivileges} = require('./middleware');
 
-let {userList, productList, orderList} = require('./init');
-let {logList} = require('./demo')
+//Importo de init.js porque necesito los datos agregados en la listas
+let {userList, productList, orderList} = require('../models/init');
+
+//Lista de usuarios logeados. 
+let {logList} = require('../models/logList')
 
 // Inicialización de Express, Morgan y Swagger
 const app = express();
@@ -47,8 +53,8 @@ app.get('/products', (req, res) => {
 
 //Lista de Ordenes
 app.get('/orders/:user_id', isLoggedIn,(req, res) => {
-    if(req.user.getPrivileges() <= 2){
-        return res.send('No puedes ver esta página')
+    if(!req.user.isAdmin()){
+        return res.status(401).json({"respuesta":'No puedes ver esta página'})
     } else {
     res.json(orderList);}
 });
@@ -66,15 +72,15 @@ app.post('/users/register', (req, res) => {
 
     //Check if the email or used is already in the database.
     if (userList.find(user => user.email == email || user.username == username)) {
-        return res.status(404).json({"respuesta" : "El nombre de usuario o email ya está registrado."});
+        return res.status(403).json({"respuesta" : "El nombre de usuario o email ya está registrado."});
     };
 
     //Create a new Object User
     newUser = new User(username,pass,full_name,phone_number,email,address);
-    
+
     //Push the new Object User to the registered user list.
     userList.push(newUser);
-    res.send(`El usuario ${newUser.username} ha sido creado existosamente`);
+    res.json({"respuesta": `El usuario ${newUser.username} ha sido creado existosamente`});
 });
 
 //Inicio de sesión
@@ -84,7 +90,7 @@ app.post('/users/login',(req, res) => {
 
     //Check if there is an user logged in.
     if (logList[0]){
-        return res.send(`Cierra la sesión actual para continuar.`)
+        return res.status(403).json({"respuesta":`Cierra la sesión actual para continuar.`})
     }
 
     //Find a match for the user email or username in the registered users database
@@ -96,7 +102,7 @@ app.post('/users/login',(req, res) => {
         logList.push(user);
         return res.send(`Has iniciado sesión con el ID ${userID}`);
     } else {
-        return res.status(404).json({"respuesta" : "El nombre de usuario o contraseña son incorrectos."})
+        return res.status(400).json({"respuesta" : "El nombre de usuario o contraseña son incorrectos."})
     }
 });
 
@@ -229,12 +235,9 @@ app.get('/orders/:order_number',isLoggedIn, orderStatus, (req,res) => {
     res.json(orderList[req.order_index])
 });
 
-
-
 //Inicio server
-let port = 3000;
-app.listen(port, () => {
-    console.log(`Servidor iniciado. Escuchando el puerto ${port}.`)
+app.listen(config.port, function () {
+    console.log(`Servidor iniciado. Escuchando el puerto ${config.port}!`);
 });
 
 //TODO investigar como usar router para tener este archivo más organizado

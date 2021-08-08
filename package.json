@@ -1,0 +1,30 @@
+{
+  "name": "dwbe-sprint-01",
+  "version": "1.0.0",
+  "description": "Sprint Project N° 1 en marco del Curso de Desarrollo Web Backend",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tdfn00b/dwbe-sprint-1.git"
+  },
+  "keywords": [
+    "Classes",
+    "NodeJS",
+    "Express",
+    "Middlewares",
+    "Swagger."
+  ],
+  "author": "David Guerrero",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tdfn00b/dwbe-sprint-1/issues"
+  },
+  "homepage": "https://github.com/tdfn00b/dwbe-sprint-1#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "morgan": "^1.10.0"
+  }
+}

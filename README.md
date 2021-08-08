@@ -1,12 +1,4 @@
 #Sprint Project 01
-
-#### Prerequisitos tecnológicos:
-
-* git
-* Node.Js
-* express
-* swagger
-
 #### Módulos de Node.Js utilizados:
 
 * "express": "^4.17.1"

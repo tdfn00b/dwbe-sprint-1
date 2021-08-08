@@ -1,11 +1,16 @@
-const {userList, productList, orderList, logList} = require('./demo');
+const {userList} = require('../models/User')
+const {productList} = require('../models/Product')
+const {orderList} = require('../models/Order')
+const {logList} = require('../models/logList')
 
+
+//Needs the ID of the USER to verify if it's logged in. (logList)
 const isLoggedIn = (req,res,next) => {
     let user_id = req.params.user_id;
 
     //Is there someone logged in ? If not you need to be logged in.
     if (logList[0] == undefined) {
-        return res.send('Por favor, inicia sesión')
+        return res.status(403).json({"respuesta":'Por favor, inicia sesión'})
     }
     //Search in the Database for the user Object by ID
     //IF there is an user logged it must be in the database, therefore it should NEVER return -1
@@ -43,7 +48,7 @@ const hasPrivileges = (req,res,next) => {
     //#################################################################################################
     //And we check if the privileges matches with the privileges requred to do the request.
     if (privileges_required > privileges){
-        return res.status(404).json({"respuesta" : "No tiene los privilegios necesarios para realizar esta petición"})
+        return res.status(401).json({"respuesta" : "No tiene los privilegios necesarios para realizar esta petición"})
     }
 
     next();
@@ -56,7 +61,7 @@ const orderStatus = (req,res,next) => {
 
     //Check if the order exists.
     if (index == -1){
-        res.send('No es un pedido válido')
+        return res.status(400).json({"respuesta": `El pedido no es válido`})
     }
     
     //If it exists, add the order Object, order index and order status to the request.
