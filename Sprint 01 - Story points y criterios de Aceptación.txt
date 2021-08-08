@@ -1,11 +1,12 @@
+TOTAL DE PUNTOS HASTA AHORA = 6
 
 Puntos:
 Registro y Login - 6 total
-3 - [] Los usuarios puedan crear una cuenta en la aplicación.
-3 - [] Los usuarios puedan hacer login con su usuario y contraseña.
+3 - [X] Los usuarios puedan crear una cuenta en la aplicación.
+3 - [X] Los usuarios puedan hacer login con su usuario y contraseña.
 
 Pedidos - 11 total
-3 - [] Los usuarios registrados puedan realizar pedidos de los productos que desean consumir
+3 - [] Los usuarios registrados puedan realizar pedidos de los productos que desean consumir.
 3 - [] Los usuarios registrados puedan ver el historial de sus pedidos.
 5 - [] Los administradores puedan ver todos los pedidos y cambiar el estado de los mismos.
 
@@ -31,7 +32,7 @@ Requerimientos Adicionales - 36 total
 2 - [] Que los usuarios no puedan modificar su pedido una vez que lo hayan cerrado.
 
 Criterios de Aceptación
-[] Un usuario debe poder registrarse exitosamente en la aplicación y hacer login en la aplicación.
+[X] Un usuario debe poder registrarse exitosamente en la aplicación y hacer login en la aplicación.
 
 [] Los estados mínimos de los pedidos deben ser:
     [] Pendiente: cuando el usuario inicia su pedido.

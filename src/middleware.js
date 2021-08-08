@@ -6,15 +6,24 @@ const {logList} = require('../models/logList')
 
 //Needs the ID of the USER to verify if it's logged in. (logList)
 const isLoggedIn = (req,res,next) => {
-    let user_id = req.params.user_id;
-
     //Is there someone logged in ? If not you need to be logged in.
     if (logList[0] == undefined) {
-        return res.status(403).json({"respuesta":'Por favor, inicia sesión'})
+        return res.status(403).json({"respuesta":"Debes iniciar sesión."})
     }
-    //Search in the Database for the user Object by ID
+    
+    //#### Search in the Database for the user Object by ID #### 
+    //       |
+    //       v
+    //We are not doing this, assuming that the request already knows the ID of the user.
+
+    
+    /*
     //IF there is an user logged it must be in the database, therefore it should NEVER return -1
     index = userList.findIndex(user => user.username == user_id);
+    */
+
+    //Parsing the index from the QUERY of the request.
+    index = parseInt(req.query.index);
 
     //Add the user Object and the user Index to the html request.
     req.user = userList[index];
@@ -22,6 +31,24 @@ const isLoggedIn = (req,res,next) => {
     //Continue the execution.
     next();
 }
+
+function isLoginUsuario(req, res, next) {
+    id = parseInt(req.query.index);
+    console.log(req.query);
+    //TODO: Por el momento solo trabajamos con el indice del usuario
+    //index = usuarios.findIndex(elemento => elemento.id == id);
+    index = id;
+    usuario = usuarios[index];
+    console.log(index);
+    if (!usuario || usuario.borrado) {
+        res.status(404).send({ resultado: `Acceso denegado` });
+    } else {
+        req.usuarioIndex = index;
+        req.usuario = usuario;
+        next();
+    }
+}
+
 /*
 const isOwner = (req,res,next) => {
     if (logList[0].username != userList[req.user_index].username){

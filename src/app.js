@@ -51,6 +51,12 @@ app.get('/products', (req, res) => {
     res.json(productList);
 });
 
+//Lista de logueados (tiene que ser solo 1)
+app.get('/login', (req, res) => {
+    //Solo para el desarrollo
+    res.json(logList);
+});
+
 //Lista de Ordenes
 app.get('/orders/:user_id', isLoggedIn,(req, res) => {
     if(!req.user.isAdmin()){
@@ -59,11 +65,6 @@ app.get('/orders/:user_id', isLoggedIn,(req, res) => {
     res.json(orderList);}
 });
 
-//Lista de logueados (tiene que ser solo 1)
-app.get('/login', (req, res) => {
-    //Solo para el desarrollo
-    res.json(logList);
-});
 
 //Registro de usuario
 app.post('/users/register', (req, res) => {
@@ -98,9 +99,9 @@ app.post('/users/login',(req, res) => {
     user = userList[userID];
 
     //If the user exists, check if the password is correct, and add the user to the logged user lists.
-    if(userList[userID].pass == passLog){
+    if(user && user.pass == passLog){
         logList.push(user);
-        return res.send(`Has iniciado sesión con el ID ${userID}`);
+        return res.json({"respuesta" : `Has iniciado sesión.`, "ID" : `${userID}`});
     } else {
         return res.status(400).json({"respuesta" : "El nombre de usuario o contraseña son incorrectos."})
     }
@@ -110,12 +111,12 @@ app.post('/users/login',(req, res) => {
 app.post('/users/logout', (req,res) =>{
     //Check if there is an user logged in.
     if (!logList[0]){
-        return res.send('No has iniciado sesión.')
+        return res.status(400).json({"respuesta": 'Tienes que iniciar sesión.'})
     }
     //If there is an user logged in, remove the user from the list.
-    usuario = logList[0].username
+    username = logList[0].username
     logList.pop()
-    res.send(`${usuario} has cerrado la sesión.`)
+    res.json({"respuesta":`El usuario ${username} ha cerrado la sesión.`})
 })
 
 //Realizar pedido
