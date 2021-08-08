@@ -11,42 +11,33 @@ const isLoggedIn = (req,res,next) => {
         return res.status(403).json({"respuesta":"Debes iniciar sesión."})
     }
     
+    /*  
     //#### Search in the Database for the user Object by ID #### 
     //       |
     //       v
     //We are not doing this, assuming that the request already knows the ID of the user.
 
     
-    /*
+  
     //IF there is an user logged it must be in the database, therefore it should NEVER return -1
     index = userList.findIndex(user => user.username == user_id);
     */
 
     //Parsing the index from the QUERY of the request.
-    index = parseInt(req.query.index);
+    index = parseInt(req.query.id);
+    user = userList[index]
+
+    //Does the user exist? Is it the one logged in?
+    if (!user || user.deleted || logList[0].email != user.email){
+        return res.status(400).json({"respuesta":"Acceso denegado"})
+    }
 
     //Add the user Object and the user Index to the html request.
     req.user = userList[index];
     req.user_index = index;
+    
     //Continue the execution.
     next();
-}
-
-function isLoginUsuario(req, res, next) {
-    id = parseInt(req.query.index);
-    console.log(req.query);
-    //TODO: Por el momento solo trabajamos con el indice del usuario
-    //index = usuarios.findIndex(elemento => elemento.id == id);
-    index = id;
-    usuario = usuarios[index];
-    console.log(index);
-    if (!usuario || usuario.borrado) {
-        res.status(404).send({ resultado: `Acceso denegado` });
-    } else {
-        req.usuarioIndex = index;
-        req.usuario = usuario;
-        next();
-    }
 }
 
 /*
@@ -59,26 +50,14 @@ const isOwner = (req,res,next) => {
 }
 */
 const hasPrivileges = (req,res,next) => {
-    //To do certain actions you need a certain privilege level.
-    //So we capture the privilege of the current logged in user.
-    let privileges = userList[req.user_index].getPrivileges()
-    req.user_privileges = privileges;
-
-    //#################################################################################################
-    //TODO: How do we check what privileges are required? We can do it with a boolean to check for an admin
-    //in the user current logged in. If so, we have to setup the requirement of every request in 
-    //I suppose each request... is it worth it?
-    let privileges_required = req.body.privileges //??????
-
-    //Maybe we can do another middleware to check what level it need to do the request with a very
-    //well used MATCH, may
-    //#################################################################################################
-    //And we check if the privileges matches with the privileges requred to do the request.
-    if (privileges_required > privileges){
-        return res.status(401).json({"respuesta" : "No tiene los privilegios necesarios para realizar esta petición"})
+    //TODO: usar ternario
+    if (req.user.isAdmin() == false){
+        return res.status(401).json({"respuesta":"No tienes permisos."})
+    } 
+    if (req.user.isAdmin() == true){
+        next();
     }
-
-    next();
+    
 }
 
 const orderStatus = (req,res,next) => {

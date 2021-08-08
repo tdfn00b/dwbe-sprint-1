@@ -125,7 +125,7 @@ app.post('/orders/', isLoggedIn,(req,res) => {
     order = orderList.find(order => order.user.username == req.user.username)
     if (order) {
         if (order.status == 1) { 
-            return res.send('Tiene otro pedido pendiente.')
+            return res.json({"respuesta":"Tiene otro pedido pendiente."})
         }
     }
 
@@ -135,7 +135,7 @@ app.post('/orders/', isLoggedIn,(req,res) => {
     //Create a new Object Order with the user and it's address and add it to the orders database.
     newOrder = new Order(req.user, paymenthMethod, req.user.address)
     orderList.push(newOrder);
-    res.send(`El usuario ${req.user.username} ha comenzado un pedido.`)
+    res.json({"respuesta":`El usuario ${req.user.username} ha comenzado un pedido.`})
 });
 
 //Agregar un producto a un pedido no confirmado
@@ -178,10 +178,15 @@ app.delete('orders/:order_number',isLoggedIn, orderStatus, (req,res) => {
 //Ver historial de pedidos completados.
 app.get('/orders',isLoggedIn, (req, res) => {
     //Parse information from request
-    let ordersFromUser = orderList.getOrdersByStatus(req.user)
+    userOrderList = [];
+    
+    ordersFromUser = orderList.filter(function(order) {
+        if (order.getUserId() == req.user && order.status == 5) {
+            userOrderList += order;
+        }});
 
     //Check if the orders of the current user is empty
-    if (ordersFromUser.length == 0){
+    if (userOrderList.length == 0){
         return res.send(`No hay ordenes para mostrar.`)
     }
 
