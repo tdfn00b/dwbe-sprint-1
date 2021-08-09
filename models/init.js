@@ -4,6 +4,10 @@ const {Product, productList} = require('../models/Product')
 const {Order, orderList} = require('../models/Order')
 const {PaymentMethod, paymentMethodList} = require('../models/PaymentMethod')
 
+//##############################################################
+//La manera en que agregué ciertos datos puede crear problemas,
+//sería mejor agregar los datos desde Swagger o Postman.
+//##############################################################
 
 //Creo y agrego usuario a la lista de usuarios
 userList.push(new User("admin","admin", null, null, "superadmin@supermail.com", null));

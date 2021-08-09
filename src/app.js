@@ -38,6 +38,9 @@ app.use(morgan('dev'));
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 //Creación de ENDPOINTS
+app.get('/',(req,res) =>{
+    res.json({"respuesta":"Sprint Project 01 - v1.0.1"})
+})
 
 //Lista de Usuarios
 app.get('/users', (req, res) => {
@@ -351,6 +354,9 @@ app.get('/payments',isLoggedIn, hasPrivileges, (req,res) => {
 app.get('user/:user_id/orders/:order_number',isLoggedIn, hasPrivileges, orderStatus, (req,res) => {
     res.json(orderList[req.order_index])
 });
+
+//Routeo de Swagger
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 //Inicio server
 app.listen(config.port, function () {
