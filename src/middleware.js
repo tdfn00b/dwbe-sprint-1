@@ -90,7 +90,7 @@ const productInOrder = (req,res,next) => {
     req.product_index_in_order = index
     next();
 }
-
+/*
 const paymentExist = (req,res,next) => {  
     let index = paymentMethodList.findIndex(payment => payment.code == req.body.code)
 
@@ -101,5 +101,5 @@ const paymentExist = (req,res,next) => {
     req.payment_index = index
     next();
 }
-
+*/
 module.exports = {isLoggedIn, orderStatus, hasPrivileges, productExist, productInOrder};

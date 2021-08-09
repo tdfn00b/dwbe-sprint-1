@@ -1,7 +1,0 @@
-if(name != undefined){
-        let is_name_repeated = productList.find(product => product.name == name)
-        if(is_name_repeated != undefined){
-            return res.status(444).json({"respuesta":`El nombre ${name} ya está siendo usado`});
-        }
-        productList[req.product_index].setName(name) 
-        modificaciones += " " + "nombre"
