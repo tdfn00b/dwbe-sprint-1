@@ -66,17 +66,25 @@ const orderStatus = (req,res,next) => {
 }
 
 const productExist = (req,res,next) => {
-    productNumber = req.body.productNumber;
+    let productNumber
+    
+    if (req.body.productNumber != undefined){
+        productNumber = req.body.productNumber;
+    } else if (req.params.product_number != undefined) {
+        productNumber = req.params.product_number
+    }
+    
     index = productList.findIndex(product => product.getProductNumber() == productNumber)
 
     if (index == -1 || productList[index].deleted) {
         return res.status(400).json({"respuesta":"El producto no existe"})
     }
 
-    if (productList[index].getStock() == false){
-        return res.status(400).json({"respuesta":"El producto no tiene stock"})
+    if (req.body.productNumber != undefined){
+        if (productList[index].getStock() == false){
+            return res.status(400).json({"respuesta":"El producto no tiene stock"})
     }
-
+    }
     req.product = productList[index]
     req.product_index = index
     req.productNumber = productList[index].getProductNumber()

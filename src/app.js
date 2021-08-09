@@ -231,6 +231,57 @@ app.get('/orders/:order_number', isLoggedIn, orderStatus,(req,res)=>{
     res.json(orderList[req.order_index])
 });
 
+//Crear nuevo producto
+app.post('/products',isLoggedIn, hasPrivileges, (req,res) => {
+    const {name, desc, price, stock} = req.body
+    //Check if the email or used is already in the user list.
+    if (productList.find(product => product.name == name)) {
+        return res.status(401).json({"respuesta" : "Un producto con ese nombre ya existe."});
+    };
+
+    //Create a new Object product
+    newProduct = new Product(name, desc, price, stock);
+
+    //Push the new Object product to the registered product list.
+    productList.push(newProduct);
+    res.json({"respuesta": `El producto ${newProduct.name} ha sido creado exitosamente.`});
+});
+
+//Modificar producto
+app.put('/products/:product_number',isLoggedIn, hasPrivileges, productExist, (req,res) => {
+    const {name, desc, price, stock} = req.body  
+    let modificaciones = ""
+    if(name != undefined){
+        let is_name_repeated = productList.find(product => product.name == name)
+        if(is_name_repeated != undefined){
+            return res.status(444).json({"respuesta":`El nombre ${name} ya está siendo usado`});
+        }
+        productList[req.product_index].setName(name) 
+        modificaciones += " nombre"
+    }
+    if (desc != undefined){
+        productList[req.product_index].setDesc(desc) 
+        modificaciones += " descripción"
+    }
+
+    if (price != undefined){
+        productList[req.product_index].setPrice(price)
+        modificaciones +=  "precio"
+    }
+    if (stock != undefined){
+        productList[req.product_index].setStock(stock) 
+        modificaciones += " stock"
+    }
+
+    res.json({"respuesta":`El producto ${req.product.name} ha actualizado su:${modificaciones}`})
+
+});
+
+//Eliminar producto
+app.delete('/products/:product_number',isLoggedIn, hasPrivileges, (req,res) => {
+
+});
+
 //Cambiar nombre de un producto, solo como administrador
 app.patch('',isLoggedIn , hasPrivileges, (req,res) => {
 
@@ -240,6 +291,7 @@ app.patch('',isLoggedIn , hasPrivileges, (req,res) => {
 app.patch('',isLoggedIn, hasPrivileges, (req,res) => {
 
 });
+
 
 //Crear nuevos medios de pagos
 app.post('/payments',isLoggedIn, hasPrivileges, (req,res) => {

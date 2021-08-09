@@ -6,14 +6,14 @@ Registro y Login - 6 total
 3 - [X] Los usuarios puedan hacer login con su usuario y contraseña.
 
 Pedidos - 11 total
-3 - [] Los usuarios registrados puedan realizar pedidos de los productos que desean consumir.
-3 - [] Los usuarios registrados puedan ver el historial de sus pedidos.
-5 - [] Los administradores puedan ver todos los pedidos y cambiar el estado de los mismos.
+3 - [X] Los usuarios registrados puedan realizar pedidos de los productos que desean consumir.
+3 - [X] Los usuarios registrados puedan ver el historial de sus pedidos.
+5 - [X] Los administradores puedan ver todos los pedidos y cambiar el estado de los mismos.
 
 Productos - 14 total
-3 - [] Los usuarios administradores puedan dar de alta nuevos productos.
-8 - [] Los usuarios administradores puedan editar un producto.
-3 - [] Los usuarios administradores puedan eliminar un producto.
+3 - [-] Los usuarios administradores puedan dar de alta nuevos productos.
+8 - [-] Los usuarios administradores puedan editar un producto.
+3 - [-] Los usuarios administradores puedan eliminar un producto.
 
 Documentación - 9 total
 5 - [] Tener la documentación de la API con Swagger
@@ -21,33 +21,34 @@ Documentación - 9 total
 1 - [] Tener el README.md con las instrucciones de instalación.
 
 Requerimientos Adicionales - 36 total
-3 - [] Que no hayan emails duplicados en el registro
-2 - [] Que los usuarios puedan seleccionar medios de pago.
-1 - [] Que los administradores puedan crear nuevos medios de pago.
-8 - [] Que los administradores puedan editar medios de pago.
-3 - [] Que los administradores puedan borrar medios de pago.
-1 - [] Que los administradores puedan ver todos los medios de pago.
-3 - [] Que los usuarios puedan agregar una dirección de destino de su pedido.
-13 - [] Que los usuarios puedan modificar su pedido mientras no lo hayan cerrado.
-2 - [] Que los usuarios no puedan modificar su pedido una vez que lo hayan cerrado.
+3 - [X] Que no hayan emails duplicados en el registro
+2 - [-] Que los usuarios puedan seleccionar medios de pago.
+1 - [-] Que los administradores puedan crear nuevos medios de pago.
+8 - [-] Que los administradores puedan editar medios de pago.
+3 - [-] Que los administradores puedan borrar medios de pago.
+1 - [-] Que los administradores puedan ver todos los medios de pago.
+3 - [-] Que los usuarios puedan agregar una dirección de destino de su pedido.
+13 - [X] Que los usuarios puedan modificar su pedido mientras no lo hayan cerrado.
+2 - [X] Que los usuarios no puedan modificar su pedido una vez que lo hayan cerrado.
 
 Criterios de Aceptación
 [X] Un usuario debe poder registrarse exitosamente en la aplicación y hacer login en la aplicación.
 
-[] Los estados mínimos de los pedidos deben ser:
-    [] Pendiente: cuando el usuario inicia su pedido.
-    [] Confirmado: cuando el usuario cierra su pedido.
-    [] En preparación: cuando el administrador comienza a preparar el pedido.
-    [] Enviado: cuando el administrador envía el pedido.
-    [] Entregado: cuando el administrador entrega el pedido.
-[] Un usuario debe poder realizar un pedido, y asignar uno o más productos a éste.
+Los estados mínimos de los pedidos deben ser:
+    [X] Pendiente: cuando el usuario inicia su pedido.
+    [X] Confirmado: cuando el usuario cierra su pedido.
+    [X] En preparación: cuando el administrador comienza a preparar el pedido.
+    [X] Enviado: cuando el administrador envía el pedido.
+    [X] Entregado: cuando el administrador entrega el pedido.
 
-[] Cuando un usuario edita un pedido debe validar:
-    [x] poder cambiar la cantidad de un producto seleccionado.
-    [] poder eliminar un producto seleccionado.
-    [] poder agregar un producto nuevo.
-    [] no debe poder editar el nombre y precio de un producto.
+[X] Un usuario debe poder realizar un pedido, y asignar uno o más productos a éste.
 
-[] Cuando un administrador edita un producto debe:
-    [] poder cambiar el nombre del producto.
-    [] poder cambiar el precio del producto.
+Cuando un usuario edita un pedido debe validar:
+    [X] poder cambiar la cantidad de un producto seleccionado.
+    [-] poder eliminar un producto seleccionado.
+    [X] poder agregar un producto nuevo.
+    [X] no debe poder editar el nombre y precio de un producto.
+
+Cuando un administrador edita un producto debe:
+    [-] poder cambiar el nombre del producto.
+    [-] poder cambiar el precio del producto.

@@ -16,8 +16,20 @@ class Product {
         return this.productNumber;
     }
 
+    setName(newName){
+        this.name = newName;
+    }
+
     setStock(newStock){
         this.stock = newStock;
+    }
+
+    setDesc(newDesc){
+        this.desc = newDesc;
+    }
+
+    setPrice(newPrice){
+        this.price = newPrice;
     }
 
     getPrice(){
