@@ -1,4 +1,5 @@
-#Sprint Project 01
+## Sprint Project 01
+
 #### Módulos de Node.Js utilizados:
 
 * "express": "^4.17.1"
@@ -15,6 +16,12 @@
 4. Ejecutar `npm install`.
 5. Arrancar el servidor ejecutando `node src/app.js`
 
-#### Documentación de la aplicación con SWAGGER:
+* Puerto utilizado para la ejecución local en el archivo `./config.js`
 
-* Ingresa a la URL http://localhost:3000/api-docs
+#### Documentación de la aplicación con Swagger:
+
+* Ingresa a la URL `http://localhost:3000/api-docs`
+
+#### Postman
+
+* Archivo JSON para la importación de colecciones de Postman en `./extra/Sprint 01.postman_collection.json`

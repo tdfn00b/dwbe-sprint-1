@@ -43,8 +43,6 @@ class Order {
         return this.user.userID
     }
 
-
-    
     getOrderNumber(){
         return this.orderNumber
     }

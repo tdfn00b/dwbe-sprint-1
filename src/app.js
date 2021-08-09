@@ -529,7 +529,7 @@ app.get('/orders/users/:user_id', isLoggedIn, (req, res) => {
  *      - application/json
  *    parameters:
  *      - in: path
- *        name: order number
+ *        name: order_number
  *        required: true
  *        description: Número del pedido.
  *        schema:
@@ -1030,13 +1030,36 @@ app.get('/payments',isLoggedIn, hasPrivileges, (req,res) => {
  *       description: Debes iniciar sesión
  */
 
-app.get('orders/users/:user_id',isLoggedIn, hasPrivileges, orderStatus, (req,res) => {
+app.get('/orders/users/:user_id',isLoggedIn, hasPrivileges, orderStatus, (req,res) => {
     res.json(orderList[req.order_index])
 });
 
+/**
+ * @swagger
+ * /products:
+ *  get:
+ *    summary: Ver lista de los productos.
+ *    description : Obtiene toda la lista de los productos.
+ *    consumes:
+ *      - application/json
+ *    parameters:
+ *      - in: query
+ *        name: id
+ *        required: true
+ *        description: Indice del usuario logueado.
+ *        schema:
+ *          type: integer
+ *          example: 0
+ *    responses:
+ *      200:
+ *       description: Mostrando la lista de productos
+ *      400:
+ *       description: Acceso denegado
+ *      403:
+ *       description: Debes iniciar sesión
+ */
 
-//Lista de Productos
-app.get('/products', isLoggedIn, hasPrivileges, (req, res) => {
+app.get('/products', isLoggedIn, (req, res) => {
     res.json(productList);
 });
 
