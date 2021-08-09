@@ -323,7 +323,6 @@ app.post('/orders', isLoggedIn,(req,res) => {
  *              description: Número del producto a agregar / remover
  *              type: integer
  *              example: 4
- * 
  *    responses:
  *      201:
  *       description: Pedido creado
@@ -396,6 +395,25 @@ app.put('/orders/:order_number', isLoggedIn, orderStatus, productExist, (req,res
  *    consumes:
  *      - application/json
  *    parameters:
+ *      - in: path
+ *        name: order number
+ *        required: true
+ *        description: Número del pedido.
+ *        schema:
+ *          type: integer
+ *          example: 4
+ *      - in: query
+ *        name: id
+ *        required: true
+ *        description: Index del usuario logueado.
+ *        schema:
+ *          type: integer
+ *          example: 4
+ *    responses:
+ *      201:
+ *       description: El pedido fue cancelado
+ *      400:
+ *       description: No es posible cancelar el pedido
  */
 
 app.delete('/orders/:order_number',isLoggedIn, orderStatus, (req,res) => {
@@ -407,7 +425,7 @@ app.delete('/orders/:order_number',isLoggedIn, orderStatus, (req,res) => {
     };
     
     orderList[req.order_index].deleted = true;
-    res.json({"respuesta":'Su pedido fue cancelado.'});
+    res.status(201).json({"respuesta":'Su pedido fue cancelado.'});
 });
 
 
@@ -420,6 +438,38 @@ app.delete('/orders/:order_number',isLoggedIn, orderStatus, (req,res) => {
  *    consumes:
  *      - application/json
  *    parameters:
+ *      - in: path
+ *        name: order number
+ *        required: true
+ *        description: Número del pedido.
+ *        schema:
+ *          type: integer
+ *          example: 4
+ *      - in: query
+ *        name: id
+ *        required: true
+ *        description: Index del usuario logueado.
+ *        schema:
+ *          type: integer
+ *          example: 4
+ *      - in: body
+ *        name: Valores
+ *        required : false
+ *        description: Valores a modificar de la orden seleccionada
+ *        schema:
+ *          type: object
+ *          properties:
+ *            newStatus:
+ *              description: Estado seleccionado para el cambio del pedido.
+ *              type: integer
+ *              example: 2
+ *    responses:
+ *      201:
+ *       description: El estado del pedido fue cambiado.
+ *      400:
+ *       description: El estado actual y el estado propuesto son iguales
+ *      403:
+ *       description: El usuario no tiene permisos para realizar esta acción
  */
 
 app.patch('/orders/:order_number',isLoggedIn, orderStatus,(req,res) => {
@@ -447,11 +497,34 @@ app.patch('/orders/:order_number',isLoggedIn, orderStatus,(req,res) => {
  *    consumes:
  *      - application/json
  *    parameters:
+ *      - in: path
+ *        name: user ID
+ *        required: true
+ *        description: Índice del usuario dueño del historial de pedidos..
+ *        schema:
+ *          type: integer
+ *          example: 4
+ *      - in: query
+ *        name: id
+ *        required: true
+ *        description: Index del usuario logueado.
+ *        schema:
+ *          type: integer
+ *          example: 4
+ *    responses:
+ *      200:
+ *       description: El estado del pedido fue cambiado.
+ *      400:
+ *       description: No hay pedidos para mostrar
+ *      403:
+ *       description: El usuario no tiene permisos para realizar esta acción
  */
 
 app.get('/orders/users/:user_id', isLoggedIn, (req, res) => {
     let userOrderList = [];
-
+    if (userList[req.params.user_id] == undefined){
+        return res.status(400).json({"respuesta":`El usuario no existe`})
+    }
     //Check in the orders list if the user has any order in any status
     orderList.forEach((order) => {
         if (order.getUserId() == userList[req.params.user_id].userID && !order.deleted) {
@@ -460,11 +533,11 @@ app.get('/orders/users/:user_id', isLoggedIn, (req, res) => {
 
     //Check if the orders of the current user is empty
     if (userOrderList.length == 0){
-        return res.status(444).json({"respuesta" : `No hay pedidos para mostrar.`})
+        return res.status(400).json({"respuesta" : `No hay pedidos para mostrar.`})
     }
 
     if (userOrderList[0].getUserId() == req.user.userID || req.user.isAdmin()){
-        return res.json(userOrderList)
+        return res.status(200).json(userOrderList)
     }
 });
 
@@ -477,17 +550,38 @@ app.get('/orders/users/:user_id', isLoggedIn, (req, res) => {
  *    consumes:
  *      - application/json
  *    parameters:
+ *      - in: path
+ *        name: order number
+ *        required: true
+ *        description: Número del pedido.
+ *        schema:
+ *          type: integer
+ *          example: 4
+ *      - in: query
+ *        name: id
+ *        required: true
+ *        description: Index del usuario logueado.
+ *        schema:
+ *          type: integer
+ *          example: 4
+ *    responses:
+ *      200:
+ *       description: El estado del pedido fue cambiado.
+ *      400:
+ *       description: No hay pedidos para mostrar
+ *      403:
+ *       description: El usuario no tiene permisos para realizar esta acción
  */
 
 app.get('/orders/:order_number', isLoggedIn, orderStatus,(req,res)=>{
     if (req.user.isAdmin()){
-        return res.json(orderList[req.order_index]);
+        return res.status(200).json(orderList[req.order_index]);
     }
     if (req.user.userID != req.order.user.userID){
-        return res.status(444).json({"respuesta": `No puede ver este pedido`});
+        return res.status(403).json({"respuesta": `No puede ver este pedido`});
     }
 
-    res.json(orderList[req.order_index])
+    res.status(200).json(orderList[req.order_index])
 });
 
 /**
@@ -499,10 +593,26 @@ app.get('/orders/:order_number', isLoggedIn, orderStatus,(req,res)=>{
  *    consumes:
  *      - application/json
  *    parameters:
+ *      - in: query
+ *        name: id
+ *        required: true
+ *        description: Index del usuario logueado.
+ *        schema:
+ *          type: integer
+ *          example: 0
+ *    responses:
+ *      200:
+ *       description: Lista de ordenes otorgada.
+ *      403:
+ *       description: Debes iniciar sesión
+ *      400:
+ *       description: Acceso denegado
+ *      406:
+ *       description: Su pedido fue rechazado
+ *      
  */
-
 app.get('/orders', isLoggedIn, hasPrivileges, (req, res) => {
-    res.json({orderList})
+    res.status(200).json({orderList})
 });
 
 /**
@@ -541,6 +651,17 @@ app.get('/orders', isLoggedIn, hasPrivileges, (req, res) => {
  *              description: Stock del producto.
  *              type: boolean
  *              example: true
+ *    responses:
+ *      200:
+ *       description: El producto ha sido creado exitosamente.
+ *      400:
+ *       description: Acceso denegado
+ *      401:
+ *       description: Un producto con ese nombre ya existe
+ *      403:
+ *       description: Debes iniciar sesión
+ *      406:
+ *       description: Su pedido fue rechazado
  */
 
 app.post('/products',isLoggedIn, hasPrivileges, (req,res) => {
@@ -567,6 +688,13 @@ app.post('/products',isLoggedIn, hasPrivileges, (req,res) => {
  *    consumes:
  *      - application/json
  *    parameters:
+ *      - in: query
+ *        name: id
+ *        required: true
+ *        description: Index del usuario logueado.
+ *        schema:
+ *          type: integer
+ *          example: 0
  *      - in: body
  *        name: producto
  *        description: producto a crear
@@ -581,28 +709,38 @@ app.post('/products',isLoggedIn, hasPrivileges, (req,res) => {
  *            name:
  *              description: Nombre del producto
  *              type: string
- *              example: Tarta JyQ M
+ *              example: Tarta JyQ L
  *            desc:
  *              description: Descripción del producto
  *              type: string
- *              example: Tarta de jamón y queso tamaño mediana.
+ *              example: Tarta de jamón y queso tamaño grande.
  *            price:
  *              description: Precio del producto
  *              type: integer
- *              example: 480
+ *              example: 600
  *            stock:
  *              description: Stock del producto.
  *              type: boolean
- *              example: true
+ *              example: false
+ *    responses:
+ *      200:
+ *       description: El producto ha sido creado exitosamente.
+ *      400:
+ *       description: Acceso denegado
+ *      401:
+ *       description: Un producto con ese nombre ya existe.
+ *      403:
+ *       description: Debes iniciar sesión
+ *      406:
+ *       description: Su pedido fue rechazado
  */
-
 app.put('/products/:product_number',isLoggedIn, hasPrivileges, productExist, (req,res) => {
     const {name, desc, price, stock} = req.body  
     let modificaciones = ""
     if(name != undefined){
         let is_name_repeated = productList.find(product => product.name == name)
         if(is_name_repeated != undefined){
-            return res.status(444).json({"respuesta":`El nombre ${name} ya está siendo usado`});
+            return res.status(401).json({"respuesta":`El nombre ${name} ya está siendo usado`});
         }
         productList[req.product_index].setName(name) 
         modificaciones += " " + "nombre"
@@ -621,7 +759,7 @@ app.put('/products/:product_number',isLoggedIn, hasPrivileges, productExist, (re
         modificaciones += " " + "stock"
     }
 
-    res.json({"respuesta":`El producto ${req.product.name} ha actualizado su:${modificaciones}`})
+    res.status(200).json({"respuesta":`El producto ${req.product.name} ha actualizado su:${modificaciones}`})
 
 });
 
@@ -634,6 +772,27 @@ app.put('/products/:product_number',isLoggedIn, hasPrivileges, productExist, (re
  *    consumes:
  *      - application/json
  *    parameters:
+ *      - in: path
+ *        name: product number
+ *        required: true
+ *        description: Número del producto seleccionado para borrar..
+ *        schema:
+ *          type: integer
+ *          example: 4
+ *      - in: query
+ *        name: id
+ *        required: true
+ *        description: Index del usuario logueado.
+ *        schema:
+ *          type: integer
+ *          example: 0
+ *    responses:
+ *      200:
+ *       description: El producto ha sido eliminado.
+ *      400:
+ *       description: Acceso denegado
+ *      403:
+ *       description: Debes iniciar sesión
  */
 
 app.delete('/products/:product_number',isLoggedIn, hasPrivileges, productExist, (req,res) => {
@@ -650,14 +809,46 @@ app.delete('/products/:product_number',isLoggedIn, hasPrivileges, productExist, 
  *    consumes:
  *      - application/json
  *    parameters:
+ *      - in: query
+ *        name: id
+ *        required: true
+ *        description: Index del usuario logueado.
+ *        schema:
+ *          type: integer
+ *          example: 0
+ *      - in: body
+ *        name: Pagos
+ *        description: Métodos de pago
+ *        schema:
+ *          type: object
+ *          required:
+ *            - code
+ *            - name
+ *          properties:
+ *            code:
+ *              description: Codigo del método de pago
+ *              type: string
+ *              example: TC
+ *            name:
+ *              description: Nombre del método de pago
+ *              type: string
+ *              example: Tarjeta de crédito
+ *    responses:
+ *      200:
+ *       description: El método de pago ha sido agregado exitosamente.
+ *      400:
+ *       description: Acceso denegado
+ *      401:
+ *       description: El método de pago ya existe
+ *      403:
+ *       description: Debes iniciar sesión
  */
-
 app.post('/payments',isLoggedIn, hasPrivileges, (req,res) => {
     const {code, name} = req.body;
     let index = paymentMethodList.findIndex(payments => payments.getCode() == code);
     
     if (index != -1){
-        return res.json({"respuesta":`El método de pago con código ${code} ya existe`})
+        return res.status(401).json({"respuesta":`El método de pago con código ${code} ya existe`})
     }
 
     let newPayment = new PaymentMethod(code,name);
@@ -665,7 +856,8 @@ app.post('/payments',isLoggedIn, hasPrivileges, (req,res) => {
 
     let newIndex = paymentMethodList.findIndex(payments => payments.getCode() == code)
     
-    res.json({"respuesta": `El método de pago ${code} ha sido agregado.`,"ID": `${newIndex}`})})
+    res.status(200).json({"respuesta": `El método de pago ${code} ha sido agregado.`,"ID": `${newIndex}`})
+});
 
 /**
  * @swagger
@@ -676,8 +868,47 @@ app.post('/payments',isLoggedIn, hasPrivileges, (req,res) => {
  *    consumes:
  *      - application/json
  *    parameters:
+ *      - in: path
+ *        name: payment ID
+ *        required: true
+ *        description: Número del pedido.
+ *        schema:
+ *          type: integer
+ *          example: 4
+ *      - in: query
+ *        name: id
+ *        required: true
+ *        description: Index del usuario logueado.
+ *        schema:
+ *          type: integer
+ *          example: 0
+ *      - in: body
+ *        name: Pagos
+ *        description: Métodos de pago
+ *        schema:
+ *          type: object
+ *          required:
+ *            - code
+ *            - name
+ *          properties:
+ *            code:
+ *              description: Codigo del método de pago
+ *              type: string
+ *              example: TC
+ *            name:
+ *              description: Nombre del método de pago
+ *              type: string
+ *              example: Tarjeta de crédito
+ *    responses:
+ *      200:
+ *       description: El método de pago ha sido agregado exitosamente.
+ *      400:
+ *       description: Acceso denegado
+ *      401:
+ *       description: El método de pago ya existe
+ *      403:
+ *       description: Debes iniciar sesión
  */
-
 app.put('/payments/:payment_id',isLoggedIn, hasPrivileges, (req,res) => {
     const {code,name} = req.body;
     let modificaciones = "";
@@ -707,8 +938,30 @@ app.put('/payments/:payment_id',isLoggedIn, hasPrivileges, (req,res) => {
  *    consumes:
  *      - application/json
  *    parameters:
+ *      - in: path
+ *        name: payment ID
+ *        required: true
+ *        description: Número del pedido.
+ *        schema:
+ *          type: integer
+ *          example: 4
+ *      - in: query
+ *        name: id
+ *        required: true
+ *        description: Index del usuario logueado.
+ *        schema:
+ *          type: integer
+ *          example: 0
+ *    responses:
+ *      200:
+ *       description: El método de pago ha sido agregado exitosamente.
+ *      400:
+ *       description: Acceso denegado
+ *      401:
+ *       description: El método de pago ya existe
+ *      403:
+ *       description: Debes iniciar sesión
  */
-
 app.delete('/payments/:payment_id',isLoggedIn, hasPrivileges, (req,res) => {
     if (!paymentMethodList[req.params.payment_id] || paymentMethodList[req.params.payment_id].isDeleted()){
         return res.json({"respuesta":"El método de pago no existe"});
@@ -727,8 +980,28 @@ app.delete('/payments/:payment_id',isLoggedIn, hasPrivileges, (req,res) => {
  *    consumes:
  *      - application/json
  *    parameters:
+ *      - in: path
+ *        name: payment ID
+ *        required: true
+ *        description: Número del pedido.
+ *        schema:
+ *          type: integer
+ *          example: 4
+ *      - in: query
+ *        name: id
+ *        required: true
+ *        description: Index del usuario logueado.
+ *        schema:
+ *          type: integer
+ *          example: 0
+ *    responses:
+ *      200:
+ *       description: Mostrando la lista de métodos de pago
+ *      400:
+ *       description: Acceso denegado
+ *      403:
+ *       description: Debes iniciar sesión
  */
-
 app.get('/payments',isLoggedIn, hasPrivileges, (req,res) => {
     res.json({paymentMethodList})
 });
@@ -742,6 +1015,34 @@ app.get('/payments',isLoggedIn, hasPrivileges, (req,res) => {
  *    consumes:
  *      - application/json
  *    parameters:
+ *      - in: path
+ *        name: user_id
+ *        required: true
+ *        description: Número del pedido.
+ *        schema:
+ *          type: integer
+ *          example: 4
+ *      - in: path
+ *        name: order_number
+ *        required: true
+ *        description: Número del pedido.
+ *        schema:
+ *          type: integer
+ *          example: 4
+ *      - in: query
+ *        name: id
+ *        required: true
+ *        description: Index del usuario logueado.
+ *        schema:
+ *          type: integer
+ *          example: 0
+ *    responses:
+ *      200:
+ *       description: Mostrando la lista de métodos de pago
+ *      400:
+ *       description: Acceso denegado
+ *      403:
+ *       description: Debes iniciar sesión
  */
 
 app.get('user/:user_id/orders/:order_number',isLoggedIn, hasPrivileges, orderStatus, (req,res) => {
