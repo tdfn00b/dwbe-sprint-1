@@ -5,7 +5,7 @@ class Product {
         this.desc = desc;
         this.price = price;
         this.stock = stock === undefined ? false : stock; //Booleano
-        this.deleted = false
+        this.deleted = false //Tener en cuenta para chequear la existencia de productos.
     }
 
     getStock(){

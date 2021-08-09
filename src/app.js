@@ -23,7 +23,7 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions);
 const {User} = require('../models/User')
 const {Product} = require('../models/Product')
 const {Order} = require('../models/Order')
-let {isLoggedIn, orderStatus, hasPrivileges} = require('./middleware');
+let {isLoggedIn, orderStatus, hasPrivileges, productExist, productInOrder} = require('./middleware');
 
 //Importo de init.js porque necesito los datos agregados en la listas
 let {userList, productList, orderList} = require('../models/init');
@@ -57,21 +57,19 @@ app.get('/login', (req, res) => {
     res.json(logList);
 });
 
+/*
 //Lista de Ordenes
-app.get('/orders/:user_id', isLoggedIn,(req, res) => {
-    if(!req.user.isAdmin()){
-        return res.status(401).json({"respuesta":'No puedes ver esta página'})
-    } else {
-    res.json(orderList);}
+app.get('/orders', isLoggedIn, hasPrivileges,(req, res) => {
+    res.json(orderList);
 });
-
+*/
 
 //Registro de usuario
 app.post('/users/register', (req, res) => {
     //Parse information from the request.
     const {username, pass, full_name, phone_number, email, address} = req.body;
 
-    //Check if the email or used is already in the database.
+    //Check if the email or used is already in the user list.
     if (userList.find(user => user.email == email || user.username == username)) {
         return res.status(403).json({"respuesta" : "El nombre de usuario o email ya está registrado."});
     };
@@ -81,7 +79,7 @@ app.post('/users/register', (req, res) => {
 
     //Push the new Object User to the registered user list.
     userList.push(newUser);
-    res.json({"respuesta": `El usuario ${newUser.username} ha sido creado existosamente`});
+    res.json({"respuesta": `El usuario ${newUser.username} ha sido creado exitosamente`});
 });
 
 //Inicio de sesión
@@ -94,7 +92,7 @@ app.post('/users/login',(req, res) => {
         return res.status(403).json({"respuesta":`Cierra la sesión actual para continuar.`})
     }
 
-    //Find a match for the user email or username in the registered users database
+    //Find a match for the user email or username in the registered users list.
     userID = userList.findIndex(user => (user.email == userLog || user.username == userLog));
     user = userList[userID];
 
@@ -123,7 +121,7 @@ app.post('/users/logout', (req,res) =>{
 app.post('/orders/', isLoggedIn,(req,res) => {
     //Check if the user has a pending order, if it does, don't allow to open a new one.
     order = orderList.find(order => order.user.username == req.user.username)
-    if (order) {
+    if (order && !order.deleted) {
         if (order.status == 1) { 
             return res.json({"respuesta":"Tiene otro pedido pendiente."})
         }
@@ -132,14 +130,18 @@ app.post('/orders/', isLoggedIn,(req,res) => {
     //Parse information from the request.
     const {paymenthMethod} = req.body
 
-    //Create a new Object Order with the user and it's address and add it to the orders database.
+    //Create a new Object Order with the user and it's address and add it to the orders list.
     newOrder = new Order(req.user, paymenthMethod, req.user.address)
     orderList.push(newOrder);
-    res.json({"respuesta":`El usuario ${req.user.username} ha comenzado un pedido.`})
+
+    //Get the ID of the new Order to get a reference.
+    orderNumber = newOrder.getOrderNumber();
+
+    res.json({"respuesta":`El usuario ${req.user.username} ha comenzado un pedido.`,"ID":`${orderNumber}`})
 });
 
 //Agregar un producto a un pedido no confirmado
-app.post('/orders/:order_number', isLoggedIn, orderStatus,(req,res) => {
+app.post('/orders/:order_number', isLoggedIn, orderStatus, productExist, (req,res) => {
     //1 = Pendiente, 2 = Confirmado, 3 = En preparación, 4 = Enviado, 5 = Entregado, 100 = Rechazado
 
     //Checks the current status of the order
@@ -151,13 +153,25 @@ app.post('/orders/:order_number', isLoggedIn, orderStatus,(req,res) => {
         return res.send('No puede modificar el pedido.')    
     }
 
-    //Parse information from the request.
-    const {product, qty} = req.body;
-
     //Add the product to the order.
-    orderList[req.order_index].addProduct(product, qty)
-    res.send(`Producto agregado`)
+    orderList[req.order_index].addProduct(req.product)
+    res.json({"respuesta":`El producto ${req.product.name} fue agregado`})
 });
+
+//Remover un producto del pedido.
+app.patch('/orders/:order_number',isLoggedIn, orderStatus, productExist, productInOrder, (req,res) => {
+    if (req.status == 100) {
+        return res.send('Su pedido fue rechazado.')
+    }
+
+    if (req.status >= 2) {
+        return res.send('No puede modificar el pedido.')    
+    }
+
+    orderList[req.order_index].removeProduct(req.product_index_in_order);
+    res.json({"respuesta":`El producto ${req.product.name} fue removido`})
+});
+
 
 //Cancelar pedido
 app.delete('orders/:order_number',isLoggedIn, orderStatus, (req,res) => {
@@ -175,22 +189,22 @@ app.delete('orders/:order_number',isLoggedIn, orderStatus, (req,res) => {
     res.send('Su pedido fue cancelado.')
 });
 
-//Ver historial de pedidos completados.
-app.get('/orders',isLoggedIn, (req, res) => {
-    //Parse information from request
+//Ver historial de pedidos del usuario logueado
+app.get('/orders', isLoggedIn, (req, res) => {
     userOrderList = [];
     
-    ordersFromUser = orderList.filter(function(order) {
-        if (order.getUserId() == req.user && order.status == 5) {
-            userOrderList += order;
+    //Check in the orders list if the user has any order in any status
+    ordersFromUser = orderList.forEach((order) => {
+        if (order.getUserId() == req.user.userID) {
+            userOrderList.push(order)
         }});
 
     //Check if the orders of the current user is empty
     if (userOrderList.length == 0){
-        return res.send(`No hay ordenes para mostrar.`)
+        return res.json({"respuesta" : `No hay ordenes para mostrar.`})
     }
 
-    res.send(ordersFromUser)
+    res.send(userOrderList)
 });
 
 //Confirmar pedido 
@@ -200,21 +214,13 @@ app.put('/orders/:order_number',isLoggedIn, orderStatus,(req,res) => {
     res.send('Su pedido fue confirmado');
 });
 
-//Cambiar cantidad de un producto seleccionado... IMPORTANTE
-app.patch('/orders/:order_number/:product_id',isLoggedIn, orderStatus, (req,res) => {
-    let productNumber = req.params.product_id;
-    productIndex = ""
-    orderList[req.order_index].orderProducts[productIndex];
-
-});
-
 //Cambiar nombre de un producto, solo como administrador
-app.patch('',isLoggedIn, (req,res) => {
+app.patch('',isLoggedIn , hasPrivileges, (req,res) => {
 
 });
 
 //Cambiar el precio de un producto,  solo como administrador
-app.patch('',isLoggedIn, (req,res) => {
+app.patch('',isLoggedIn, hasPrivileges, (req,res) => {
 
 });
 
@@ -236,8 +242,8 @@ app.get('/payments',isLoggedIn, hasPrivileges, (req,res) => {
 
 });
 
-//Ver pedido
-app.get('/orders/:order_number',isLoggedIn, orderStatus, (req,res) => {
+//Ver pedido de un usuario como admin
+app.get('user/:user_id/orders/:order_number',isLoggedIn, hasPrivileges, orderStatus, (req,res) => {
     res.json(orderList[req.order_index])
 });
 
@@ -248,8 +254,3 @@ app.listen(config.port, function () {
 
 //TODO investigar como usar router para tener este archivo más organizado
 //Investigar ERROR / ERR
-//No es correcto que los endpoints usen varibles del usuario en la URL
-//Aunque no pensaba en que el ENDPOINT se veía en el URL.
-//TODO buscar como buscar esto ja
-
-//Investigar los VERBOS y lo que hacen

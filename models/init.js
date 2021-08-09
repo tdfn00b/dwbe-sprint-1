@@ -39,10 +39,13 @@ let order2 = new Order(user2, efectivo, user2.address);
 let order3 = new Order(user3, debito, user3.address);
 
 //Agrego productos a las ordenes
-order1.addProduct(1, 3)
-order2.addProduct(2, 2)
-order2.addProduct(4, 2)
-order3.addProduct(3, 1)
+order1.addProduct(productList[0])
+order1.addProduct(productList[0])
+order1.addProduct(productList[0])
+order2.addProduct(productList[1])
+order2.addProduct(productList[1])
+order2.addProduct(productList[3])
+order2.addProduct(productList[3])
 
 //Agrego ordenes a la lista de ordenes
 orderList.push(order1)

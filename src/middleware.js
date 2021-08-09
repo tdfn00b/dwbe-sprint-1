@@ -1,8 +1,5 @@
-const {userList} = require('../models/User')
-const {productList} = require('../models/Product')
-const {orderList} = require('../models/Order')
 const {logList} = require('../models/logList')
-
+let {userList, productList, orderList} = require('../models/init');
 
 //Needs the ID of the USER to verify if it's logged in. (logList)
 const isLoggedIn = (req,res,next) => {
@@ -28,7 +25,7 @@ const isLoggedIn = (req,res,next) => {
     user = userList[index]
 
     //Does the user exist? Is it the one logged in?
-    if (!user || user.deleted || logList[0].email != user.email){
+    if (!user || user.deleted || logList[0].userID != user.userID){
         return res.status(400).json({"respuesta":"Acceso denegado"})
     }
 
@@ -40,21 +37,12 @@ const isLoggedIn = (req,res,next) => {
     next();
 }
 
-/*
-const isOwner = (req,res,next) => {
-    if (logList[0].username != userList[req.user_index].username){
-        return res.send('No tiene autorización para ver esta página')
-    } 
-
-    next()
-}
-*/
 const hasPrivileges = (req,res,next) => {
-    //TODO: usar ternario
-    if (req.user.isAdmin() == false){
+    //TODO: probar condicional ternario
+    if (req.user.isAdmin() === false){
         return res.status(401).json({"respuesta":"No tienes permisos."})
     } 
-    if (req.user.isAdmin() == true){
+    if (req.user.isAdmin() === true){
         next();
     }
     
@@ -62,12 +50,12 @@ const hasPrivileges = (req,res,next) => {
 
 const orderStatus = (req,res,next) => {
     //Request the index of the order in the orders database.
-    let orderNumber = req.params.order_number;
+    orderNumber = req.params.order_number;
     index = orderList.findIndex(order => order.orderNumber == orderNumber);
 
     //Check if the order exists.
-    if (index == -1){
-        return res.status(400).json({"respuesta": `El pedido no es válido`})
+    if (index == -1 || orderList[index].deleted){
+        return res.status(400).json({"respuesta": `El pedido no existe`})
     }
     
     //If it exists, add the order Object, order index and order status to the request.
@@ -77,4 +65,34 @@ const orderStatus = (req,res,next) => {
     next();
 }
 
-module.exports = {isLoggedIn, orderStatus, hasPrivileges};
+const productExist = (req,res,next) => {
+    productNumber = req.body.productNumber;
+    index = productList.findIndex(product => product.getProductNumber() == productNumber)
+
+    if (index == -1 || productList[index].deleted) {
+        return res.status(400).json({"respuesta":"El producto no existe"})
+    }
+
+    if (productList[index].getStock() == false){
+        return res.status(400).json({"respuesta":"El producto no tiene stock"})
+    }
+
+    req.product = productList[index]
+    req.product_index = index
+    req.productNumber = productList[index].getProductNumber()
+    next();
+}
+
+const productInOrder = (req,res,next) => {
+    product_name = req.product.name
+    index = orderList[req.order_index].orderProducts.findIndex(product => product.name == product_name)
+    
+    if (index == undefined){
+        return res.status(400).json({"respuesta":"El producto no se encuentra en la orden"})
+    }
+
+    req.product_index_in_order = index
+    next();
+}
+
+module.exports = {isLoggedIn, orderStatus, hasPrivileges, productExist, productInOrder};
