@@ -4,6 +4,17 @@ class PaymentMethod {
         this.name = name;
         this.deleted = false;
     }
+
+    deletePaymentMethod(){
+        this.deleted = true;
+    }
+    isDeleted(){
+        return this.deleted;
+    }
+
+    getCode(){
+        return this.code
+    }
 }
 
 let paymentMethodList = []

@@ -1,5 +1,5 @@
 const {logList} = require('../models/logList')
-let {userList, productList, orderList} = require('../models/init');
+let {userList, productList, orderList, paymentMethodList} = require('../models/init');
 
 //Needs the ID of the USER to verify if it's logged in. (logList)
 const isLoggedIn = (req,res,next) => {
@@ -21,8 +21,8 @@ const isLoggedIn = (req,res,next) => {
     */
 
     //Parsing the index from the QUERY of the request.
-    index = parseInt(req.query.id);
-    user = userList[index]
+    let index = parseInt(req.query.id);
+    let user = userList[index]
 
     //Does the user exist? Is it the one logged in?
     if (!user || user.deleted || logList[0].userID != user.userID){
@@ -50,8 +50,8 @@ const hasPrivileges = (req,res,next) => {
 
 const orderStatus = (req,res,next) => {
     //Request the index of the order in the orders database.
-    orderNumber = req.params.order_number;
-    index = orderList.findIndex(order => order.orderNumber == orderNumber);
+    let orderNumber = req.params.order_number;
+    let index = orderList.findIndex(order => order.orderNumber == orderNumber);
 
     //Check if the order exists.
     if (index == -1 || orderList[index].deleted){
@@ -74,7 +74,7 @@ const productExist = (req,res,next) => {
         productNumber = req.params.product_number
     }
     
-    index = productList.findIndex(product => product.getProductNumber() == productNumber)
+    let index = productList.findIndex(product => product.getProductNumber() == productNumber)
 
     if (index == -1 || productList[index].deleted) {
         return res.status(400).json({"respuesta":"El producto no existe"})
@@ -92,14 +92,25 @@ const productExist = (req,res,next) => {
 }
 
 const productInOrder = (req,res,next) => {
-    product_name = req.product.name
-    index = orderList[req.order_index].orderProducts.findIndex(product => product.name == product_name)
+    let product_name = req.product.name
+    let index = orderList[req.order_index].orderProducts.findIndex(product => product.name == product_name)
     
     if (index == -1){
         return res.status(400).json({"respuesta":"El producto no se encuentra en la orden"})
     }
 
     req.product_index_in_order = index
+    next();
+}
+
+const paymentExist = (req,res,next) => {  
+    let index = paymentMethodList.findIndex(payment => payment.code == req.body.code)
+
+    if (index == -1 || paymentMethodList[index].deleted) {
+        return res.status(400).json({"respuesta":"El método de pago no existe"})
+    }
+    req.payment = productList[index]
+    req.payment_index = index
     next();
 }
 

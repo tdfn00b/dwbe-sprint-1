@@ -23,10 +23,11 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions);
 const {User} = require('../models/User')
 const {Product} = require('../models/Product')
 const {Order} = require('../models/Order')
+const {PaymentMethod} = require('../models/PaymentMethod')
 let {isLoggedIn, orderStatus, hasPrivileges, productExist, productInOrder} = require('./middleware');
 
 //Importo de init.js porque necesito los datos agregados en la listas
-let {userList, productList, orderList} = require('../models/init');
+let {userList, productList, orderList, paymentMethodList} = require('../models/init');
 
 //Lista de usuarios logeados. 
 let {logList} = require('../models/logList')
@@ -140,7 +141,8 @@ app.post('/orders/', isLoggedIn,(req,res) => {
     res.json({"respuesta":`El usuario ${req.user.username} ha comenzado un pedido.`,"ID":`${orderNumber}`})
 });
 
-//Agregar un producto a un pedido no confirmado
+//TODO: Combinar este app.post('/orders/:order_number' con app.put('/orders/:order_number'
+//Agregar un producto a un pedido no confirmado 
 app.post('/orders/:order_number', isLoggedIn, orderStatus, productExist, (req,res) => {
     //1 = Pendiente, 2 = Confirmado, 3 = En preparación, 4 = Enviado, 5 = Entregado, 100 = Rechazado
 
@@ -221,9 +223,9 @@ app.get('/orders', isLoggedIn, (req, res) => {
     res.json(userOrderList)
 });
 
-//Ver una orden como usuario
+//Ver una orden como usuario o admin
 app.get('/orders/:order_number', isLoggedIn, orderStatus,(req,res)=>{
-    if (req.user.userID != req.order.user.userID){
+    if (req.user.userID != req.order.user.userID || !req.user.isAdmin()){
         return res.status(444).json({"respuesta": `No puede ver este pedido`})
     }
 
@@ -256,20 +258,20 @@ app.put('/products/:product_number',isLoggedIn, hasPrivileges, productExist, (re
             return res.status(444).json({"respuesta":`El nombre ${name} ya está siendo usado`});
         }
         productList[req.product_index].setName(name) 
-        modificaciones += " nombre"
+        modificaciones += " " + "nombre"
     }
     if (desc != undefined){
         productList[req.product_index].setDesc(desc) 
-        modificaciones += " descripción"
+        modificaciones += " " + "descripción"
     }
 
     if (price != undefined){
         productList[req.product_index].setPrice(price)
-        modificaciones +=  "precio"
+        modificaciones +=  " " + "precio"
     }
     if (stock != undefined){
         productList[req.product_index].setStock(stock) 
-        modificaciones += " stock"
+        modificaciones += " " + "stock"
     }
 
     res.json({"respuesta":`El producto ${req.product.name} ha actualizado su:${modificaciones}`})
@@ -282,36 +284,59 @@ app.delete('/products/:product_number',isLoggedIn, hasPrivileges, productExist, 
     res.json({"respuesta":`El producto ${req.product.name} fue eliminado.`})
 });
 
-//Cambiar nombre de un producto, solo como administrador
-app.patch('',isLoggedIn , hasPrivileges, (req,res) => {
-
-});
-
-//Cambiar el precio de un producto,  solo como administrador
-app.patch('',isLoggedIn, hasPrivileges, (req,res) => {
-
-});
-
-
 //Crear nuevos medios de pagos
 app.post('/payments',isLoggedIn, hasPrivileges, (req,res) => {
+    const {code, name} = req.body;
+    let index = paymentMethodList.findIndex(payments => payments.getCode() == code);
+    
+    if (index != -1){
+        return res.json({"respuesta":`El método de pago con código ${code} ya existe`})
+    }
 
-});
+    let newPayment = new PaymentMethod(code,name);
+    paymentMethodList.push(newPayment);
+
+    let newIndex = paymentMethodList.findIndex(payments => payments.getCode() == code)
+    
+    res.json({"respuesta": `El método de pago ${code} ha sido agregado.`,"ID": `${newIndex}`})})
 
 //Editar medios de pago
-app.put('/payments/:payments_id',isLoggedIn, hasPrivileges, (req,res) => {
+app.put('/payments/:payment_id',isLoggedIn, hasPrivileges, (req,res) => {
+    const {code,name} = req.body;
+    let modificaciones = "";
+    
+    if (!paymentMethodList[req.params.payment_id] || paymentMethodList[req.params.payment_id].isDeleted()){
+        return res.json({"respuesta":"El método de pago no existe"});
+    }
+    
+    if (code != undefined){
+        paymentMethodList[req.params.payment_id].code = code
+        modificaciones += " " + "Código cambiado. "
+    }
 
+    if (name != undefined){
+        paymentMethodList[req.params.payment_id].name = name  
+        modificaciones +=  " " + "Nombre cambiado."}
+    
+        res.json({"respuesta":`${modificaciones}`})
 });
+
 //Borrar medios de pago
-app.delete('/payments/:payments_id',isLoggedIn, hasPrivileges, (req,res) => {
-
+app.delete('/payments/:payment_id',isLoggedIn, hasPrivileges, (req,res) => {
+    if (!paymentMethodList[req.params.payment_id] || paymentMethodList[req.params.payment_id].isDeleted()){
+        return res.json({"respuesta":"El método de pago no existe"});
+    }
+    let codigo = paymentMethodList[req.params.payment_id].getCode();
+    paymentMethodList[req.params.payment_id].deletePaymentMethod();
+    res.json({"respuesta":`El método de pago con código ${codigo} ha sido borrado`})
 });
+
 //Ver todos los medios de pago
 app.get('/payments',isLoggedIn, hasPrivileges, (req,res) => {
-
+    res.json({paymentMethodList})
 });
 
-//Ver pedido de un usuario como admin
+//Ver todos los pedidos de un usuario como admin
 app.get('user/:user_id/orders/:order_number',isLoggedIn, hasPrivileges, orderStatus, (req,res) => {
     res.json(orderList[req.order_index])
 });
@@ -320,6 +345,7 @@ app.get('user/:user_id/orders/:order_number',isLoggedIn, hasPrivileges, orderSta
 app.listen(config.port, function () {
     console.log(`Servidor iniciado. Escuchando el puerto ${config.port}!`);
 });
+
 
 //TODO investigar como usar router para tener este archivo más organizado
 //Investigar ERROR / ERR
