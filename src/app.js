@@ -114,7 +114,6 @@ app.get('/login', (req, res) => {
  *      
  */
 
-//Registro de usuario
 app.post('/users/register', (req, res) => {
     //Parse information from the request.
     const {username, pass, full_name, phone_number, email, address} = req.body;
@@ -205,7 +204,6 @@ app.post('/users/login',(req, res) => {
  *       description: No estas logueado
  */
 
-//Cerrado de sesión
 app.post('/users/logout', (req,res) =>{
     //Check if there is an user logged in.
     if (!logList[0]){
@@ -244,8 +242,8 @@ app.post('/users/logout', (req,res) =>{
  *          properties:
  *            paymentMethod:
  *              description: ID del método de pago .
- *              type: string
- *              example: 1
+ *              type: integer
+ *              example: 0
  *    responses:
  *      201:
  *       description: Pedido creado
@@ -254,7 +252,6 @@ app.post('/users/logout', (req,res) =>{
  *      
  */
 
-//Realizar pedido
 app.post('/orders', isLoggedIn,(req,res) => {
     //Check if the user has a pending order, if it does, don't allow to open a new one.
     order = orderList.find(order => order.user.username == req.user.username)
@@ -276,16 +273,23 @@ app.post('/orders', isLoggedIn,(req,res) => {
 
     res.json({"respuesta":`El usuario ${req.user.username} ha comenzado un pedido.`,"ID":`${orderNumber}`})
 });
-//HACIENDO
+
 /**
  * @swagger
  * /orders/{order_number}:
  *  put:
  *    summary: Modificación de un pedido.
- *    description : Modifica un pedido que no esté se encuentre confirmado.
+ *    description : Modifica un pedido que no se encuentre confirmado.
  *    consumes:
  *      - application/json
  *    parameters:
+ *      - in: path
+ *        name: order number
+ *        required: true
+ *        description: Número del pedido.
+ *        schema:
+ *          type: integer
+ *          example: 4
  *      - in: query
  *        name: id
  *        required: true
@@ -293,38 +297,54 @@ app.post('/orders', isLoggedIn,(req,res) => {
  *        schema:
  *          type: integer
  *          example: 4
- *        
+ *      - in: query
+ *        name: action
+ *        required: false
+ *        description: Elige entre agregar o remover un producto
+ *        schema:
+ *          type: string
+ *          example: add
  *      - in: body
- *        name: paymentMethod
- *        required : true
- *        description: Método de pago
+ *        name: Valores
+ *        required : false
+ *        description: Valores a modificar de la orden seleccionada
  *        schema:
  *          type: object
- *          required:
- *            - paymentMethod
  *          properties:
  *            paymentMethod:
- *              description: ID del método de pago .
+ *              description: ID del método de pago.
+ *              type: integer
+ *              example: 0
+ *            address:
+ *              description: Dirección de envío.
  *              type: string
- *              example: 1
+ *              example: Calle Verdadera 123
+ *            productNumber:
+ *              description: Número del producto a agregar / remover
+ *              type: integer
+ *              example: 4
+ * 
  *    responses:
  *      201:
  *       description: Pedido creado
  *      401:
- *       description: Pedido no creado
+ *       description: No puede modificar el pedido.
+ *      400:
+ *       description: El pedido no se encuentra en la orden
+ *      406:
+ *       description: Su pedido fue rechazado
  *      
  */
 
-//Modifica un pedido no confirmado
 app.put('/orders/:order_number', isLoggedIn, orderStatus, productExist, (req,res) => {
-    //1 = Pendiente, 2 = Confirmado, 3 = En preparación, 4 = Enviado, 5 = Entregado, 100 = Rechazado
+    
     //Checks the current status of the order
     if (req.status == 100) {
         return res.json({"respuesta":'Su pedido fue rechazado.'})
     }
     
     if (req.status >= 2) {
-        return res.json({"respuesta":'No puede modificar el pedido.'}) 
+        return res.status(401).json({"respuesta":'No puede modificar el pedido.'}) 
     }
     
     const {paymentMethod, address, productNumber} = req.body
@@ -363,15 +383,21 @@ app.put('/orders/:order_number', isLoggedIn, orderStatus, productExist, (req,res
     res.json({"respuesta": `El pedido ha sido modificado ${modificaciones}`})
 
 });
-
+//######################################################################################################################
+//######################################################################################################################
+//######################################################################################################################
+//######################################################################################################################
 /**
  * @swagger
  * /orders/{order_number}:
  *  delete:
- *
+ *    summary: Cancela un pedido
+ *    description : Cancela como usuario un pedido
+ *    consumes:
+ *      - application/json
+ *    parameters:
  */
 
-//Cancelar como usuario un pedido
 app.delete('/orders/:order_number',isLoggedIn, orderStatus, (req,res) => {
     //If the status of the order is already sended or more
     //it's not possible to cancel the order as an User.    
@@ -389,10 +415,13 @@ app.delete('/orders/:order_number',isLoggedIn, orderStatus, (req,res) => {
  * @swagger
  * /orders/{order_number}:
  *  patch:
- *
+ *    summary: Cambiar estado de pedido
+ *    description : Cambiar estado de pedido. 1 = Pendiente, 2 = Confirmado, 3 = En preparación, 4 = Enviado, 5 = Entregado, 100 = Rechazado.
+ *    consumes:
+ *      - application/json
+ *    parameters:
  */
 
-//Cambiar estado de pedido
 app.patch('/orders/:order_number',isLoggedIn, orderStatus,(req,res) => {
     const {newStatus} = req.body;
     oldStatus = req.order.getStatus();
@@ -413,10 +442,13 @@ app.patch('/orders/:order_number',isLoggedIn, orderStatus,(req,res) => {
  * @swagger
  * /orders/users/{user_id}:
  *  get:
- *
+ *    summary: Ver historial
+ *    description : Ver el historial de pedidos del usuario que se encuentra haciendo la petición si no es admin.
+ *    consumes:
+ *      - application/json
+ *    parameters:
  */
 
-//Ver historial de pedidos del usuario logueado
 app.get('/orders/users/:user_id', isLoggedIn, (req, res) => {
     let userOrderList = [];
 
@@ -440,10 +472,13 @@ app.get('/orders/users/:user_id', isLoggedIn, (req, res) => {
  * @swagger
  * /orders/{order_number}:
  *  get:
- *
+ *    summary: Ver un pedido.
+ *    description : Ve un pedido como admin o como usuario si es el propietario.
+ *    consumes:
+ *      - application/json
+ *    parameters:
  */
 
-//Ver una orden como usuario o admin
 app.get('/orders/:order_number', isLoggedIn, orderStatus,(req,res)=>{
     if (req.user.isAdmin()){
         return res.json(orderList[req.order_index]);
@@ -459,7 +494,11 @@ app.get('/orders/:order_number', isLoggedIn, orderStatus,(req,res)=>{
  * @swagger
  * /orders:
  *  get:
- *
+ *    summary: Ver lista de pedidos
+ *    description : Obtiene toda la lista de pedidos, borrados y no.  Solo para administradores.
+ *    consumes:
+ *      - application/json
+ *    parameters:
  */
 
 app.get('/orders', isLoggedIn, hasPrivileges, (req, res) => {
@@ -470,10 +509,40 @@ app.get('/orders', isLoggedIn, hasPrivileges, (req, res) => {
  * @swagger
  * /products:
  *  post:
- *
+ *    summary: Crear un producto.
+ *    description : Crea un objeto de clase Producto y lo agrega a la lista de productos. Solo para administradores.
+ *    consumes:
+ *      - application/json
+ *    parameters:
+ *      - in: body
+ *        name: producto
+ *        description: producto a crear
+ *        schema:
+ *          type: object
+ *          required:
+ *            - name
+ *            - desc
+ *            - price
+ *            - stock
+ *          properties:
+ *            name:
+ *              description: Nombre del producto
+ *              type: string
+ *              example: Tarta JyQ M
+ *            desc:
+ *              description: Descripción del producto
+ *              type: string
+ *              example: Tarta de jamón y queso tamaño mediana.
+ *            price:
+ *              description: Precio del producto
+ *              type: integer
+ *              example: 480
+ *            stock:
+ *              description: Stock del producto.
+ *              type: boolean
+ *              example: true
  */
 
-//Crear nuevo producto
 app.post('/products',isLoggedIn, hasPrivileges, (req,res) => {
     const {name, desc, price, stock} = req.body
     //Check if the email or used is already in the user list.
@@ -493,10 +562,40 @@ app.post('/products',isLoggedIn, hasPrivileges, (req,res) => {
  * @swagger
  * /products/{product_number}:
  *  put:
- *
+ *    summary: Modificación de un producto.
+ *    description : Modifica los valores de un producto. Solo para administradores.
+ *    consumes:
+ *      - application/json
+ *    parameters:
+ *      - in: body
+ *        name: producto
+ *        description: producto a crear
+ *        schema:
+ *          type: object
+ *          required:
+ *            - name
+ *            - desc
+ *            - price
+ *            - stock
+ *          properties:
+ *            name:
+ *              description: Nombre del producto
+ *              type: string
+ *              example: Tarta JyQ M
+ *            desc:
+ *              description: Descripción del producto
+ *              type: string
+ *              example: Tarta de jamón y queso tamaño mediana.
+ *            price:
+ *              description: Precio del producto
+ *              type: integer
+ *              example: 480
+ *            stock:
+ *              description: Stock del producto.
+ *              type: boolean
+ *              example: true
  */
 
-//Modificar producto
 app.put('/products/:product_number',isLoggedIn, hasPrivileges, productExist, (req,res) => {
     const {name, desc, price, stock} = req.body  
     let modificaciones = ""
@@ -530,10 +629,13 @@ app.put('/products/:product_number',isLoggedIn, hasPrivileges, productExist, (re
  * @swagger
  * /products/{product_number}:
  *  delete:
- *
+ *    summary: Elimina un producto
+ *    description : Elimina un producto de forma lógica.  Solo para administradores.
+ *    consumes:
+ *      - application/json
+ *    parameters:
  */
 
-//Eliminar producto
 app.delete('/products/:product_number',isLoggedIn, hasPrivileges, productExist, (req,res) => {
     productList[req.product_index].deleteProduct()
     res.json({"respuesta":`El producto ${req.product.name} fue eliminado.`})
@@ -543,10 +645,13 @@ app.delete('/products/:product_number',isLoggedIn, hasPrivileges, productExist, 
  * @swagger
  * /payments:
  *  post:
- *
+ *    summary: Crea medio de pago.
+ *    description : Crea un nuevo medio de pago. Solo para administradores.
+ *    consumes:
+ *      - application/json
+ *    parameters:
  */
 
-//Crear nuevos medios de pagos
 app.post('/payments',isLoggedIn, hasPrivileges, (req,res) => {
     const {code, name} = req.body;
     let index = paymentMethodList.findIndex(payments => payments.getCode() == code);
@@ -566,10 +671,13 @@ app.post('/payments',isLoggedIn, hasPrivileges, (req,res) => {
  * @swagger
  * /payments/{payment_id}:
  *  put:
- *
+ *    summary: Edita un medio de pago.
+ *    description : Edita parcial o completamente el medio de pago seleccionado. Solo para administradores.
+ *    consumes:
+ *      - application/json
+ *    parameters:
  */
 
-//Editar medios de pago
 app.put('/payments/:payment_id',isLoggedIn, hasPrivileges, (req,res) => {
     const {code,name} = req.body;
     let modificaciones = "";
@@ -594,10 +702,13 @@ app.put('/payments/:payment_id',isLoggedIn, hasPrivileges, (req,res) => {
  * @swagger
  * /payments/{payment_id}:
  *  delete:
- *
+ *    summary: Borra un medio de pago.
+ *    description : Borra lógicamente el medio de pago seleccionado.  Solo para administradores.
+ *    consumes:
+ *      - application/json
+ *    parameters:
  */
 
-//Borrar medios de pago
 app.delete('/payments/:payment_id',isLoggedIn, hasPrivileges, (req,res) => {
     if (!paymentMethodList[req.params.payment_id] || paymentMethodList[req.params.payment_id].isDeleted()){
         return res.json({"respuesta":"El método de pago no existe"});
@@ -611,10 +722,13 @@ app.delete('/payments/:payment_id',isLoggedIn, hasPrivileges, (req,res) => {
  * @swagger
  * /payments:
  *  get:
- *
+ *    summary: Ver lista de los medios de pagos.
+ *    description : Obtiene toda la lista de medios de pagos, borrados y no.  Solo para administradores.
+ *    consumes:
+ *      - application/json
+ *    parameters:
  */
 
-//Ver todos los medios de pago
 app.get('/payments',isLoggedIn, hasPrivileges, (req,res) => {
     res.json({paymentMethodList})
 });
@@ -623,10 +737,13 @@ app.get('/payments',isLoggedIn, hasPrivileges, (req,res) => {
  * @swagger
  * /user/{user_id}/orders/{order_number}:
  *  get:
- *
+ *    summary: Ver todos los pedidos de un usuario.
+ *    description : Muestra toda la lista de todos los pedidos en todos los estados del usuario seleccionado. Solo para administradores.
+ *    consumes:
+ *      - application/json
+ *    parameters:
  */
 
-//Ver todos los pedidos de un usuario como admin
 app.get('user/:user_id/orders/:order_number',isLoggedIn, hasPrivileges, orderStatus, (req,res) => {
     res.json(orderList[req.order_index])
 });
