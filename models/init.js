@@ -33,24 +33,19 @@ let debito = new PaymentMethod("TD", "Tarjeta Debito")
 paymentMethodList.push(efectivo)
 paymentMethodList.push(debito)
 
-//Creo ordenes para cada usuario
-let order1 = new Order(userList[1], efectivo, userList[1].address);
-let order2 = new Order(userList[2], efectivo, userList[2].address);
-let order3 = new Order(userList[3], debito, userList[3].address);
+//Agrego ordenes a la lista de ordenes
+orderList.push(new Order(userList[1], paymentMethodList[0], userList[1].address))
+orderList.push(new Order(userList[2], paymentMethodList[0], userList[2].address))
+orderList.push(new Order(userList[3], paymentMethodList[1], userList[3].address))
 
 //Agrego productos a las ordenes
-order1.addProduct(productList[0])
-order1.addProduct(productList[0])
-order1.addProduct(productList[0])
-order2.addProduct(productList[1])
-order2.addProduct(productList[1])
-order2.addProduct(productList[3])
-order2.addProduct(productList[3])
-
-//Agrego ordenes a la lista de ordenes
-orderList.push(order1)
-orderList.push(order2)
-orderList.push(order3)
+orderList[0].addProduct(productList[0])
+orderList[0].addProduct(productList[0])
+orderList[0].addProduct(productList[0])
+orderList[1].addProduct(productList[1])
+orderList[1].addProduct(productList[1])
+orderList[1].addProduct(productList[3])
+orderList[2].addProduct(productList[3])
 
 //Exporto para el uso en app.js
 module.exports = {User, userList, Product, productList, Order, orderList, PaymentMethod, paymentMethodList}

@@ -276,13 +276,13 @@ app.post('/orders', isLoggedIn,(req,res) => {
 
     res.json({"respuesta":`El usuario ${req.user.username} ha comenzado un pedido.`,"ID":`${orderNumber}`})
 });
-
+//HACIENDO
 /**
  * @swagger
  * /orders/{order_number}:
- *  post:
- *    summary: Creado de pedido.
- *    description : Creado de pedido.
+ *  put:
+ *    summary: Modificación de un pedido.
+ *    description : Modifica un pedido que no esté se encuentre confirmado.
  *    consumes:
  *      - application/json
  *    parameters:
@@ -293,6 +293,7 @@ app.post('/orders', isLoggedIn,(req,res) => {
  *        schema:
  *          type: integer
  *          example: 4
+ *        
  *      - in: body
  *        name: paymentMethod
  *        required : true
@@ -313,7 +314,6 @@ app.post('/orders', isLoggedIn,(req,res) => {
  *       description: Pedido no creado
  *      
  */
-
 
 //Modifica un pedido no confirmado
 app.put('/orders/:order_number', isLoggedIn, orderStatus, productExist, (req,res) => {
@@ -364,6 +364,13 @@ app.put('/orders/:order_number', isLoggedIn, orderStatus, productExist, (req,res
 
 });
 
+/**
+ * @swagger
+ * /orders/{order_number}:
+ *  delete:
+ *
+ */
+
 //Cancelar como usuario un pedido
 app.delete('/orders/:order_number',isLoggedIn, orderStatus, (req,res) => {
     //If the status of the order is already sended or more
@@ -376,6 +383,14 @@ app.delete('/orders/:order_number',isLoggedIn, orderStatus, (req,res) => {
     orderList[req.order_index].deleted = true;
     res.json({"respuesta":'Su pedido fue cancelado.'});
 });
+
+
+/**
+ * @swagger
+ * /orders/{order_number}:
+ *  patch:
+ *
+ */
 
 //Cambiar estado de pedido
 app.patch('/orders/:order_number',isLoggedIn, orderStatus,(req,res) => {
@@ -393,6 +408,13 @@ app.patch('/orders/:order_number',isLoggedIn, orderStatus,(req,res) => {
     }
     
 });
+
+/**
+ * @swagger
+ * /orders/users/{user_id}:
+ *  get:
+ *
+ */
 
 //Ver historial de pedidos del usuario logueado
 app.get('/orders/users/:user_id', isLoggedIn, (req, res) => {
@@ -414,6 +436,13 @@ app.get('/orders/users/:user_id', isLoggedIn, (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /orders/{order_number}:
+ *  get:
+ *
+ */
+
 //Ver una orden como usuario o admin
 app.get('/orders/:order_number', isLoggedIn, orderStatus,(req,res)=>{
     if (req.user.isAdmin()){
@@ -426,9 +455,23 @@ app.get('/orders/:order_number', isLoggedIn, orderStatus,(req,res)=>{
     res.json(orderList[req.order_index])
 });
 
+/**
+ * @swagger
+ * /orders:
+ *  get:
+ *
+ */
+
 app.get('/orders', isLoggedIn, hasPrivileges, (req, res) => {
     res.json({orderList})
 });
+
+/**
+ * @swagger
+ * /products:
+ *  post:
+ *
+ */
 
 //Crear nuevo producto
 app.post('/products',isLoggedIn, hasPrivileges, (req,res) => {
@@ -445,6 +488,13 @@ app.post('/products',isLoggedIn, hasPrivileges, (req,res) => {
     productList.push(newProduct);
     res.json({"respuesta": `El producto ${newProduct.name} ha sido creado exitosamente.`});
 });
+
+/**
+ * @swagger
+ * /products/{product_number}:
+ *  put:
+ *
+ */
 
 //Modificar producto
 app.put('/products/:product_number',isLoggedIn, hasPrivileges, productExist, (req,res) => {
@@ -476,11 +526,25 @@ app.put('/products/:product_number',isLoggedIn, hasPrivileges, productExist, (re
 
 });
 
+/**
+ * @swagger
+ * /products/{product_number}:
+ *  delete:
+ *
+ */
+
 //Eliminar producto
 app.delete('/products/:product_number',isLoggedIn, hasPrivileges, productExist, (req,res) => {
     productList[req.product_index].deleteProduct()
     res.json({"respuesta":`El producto ${req.product.name} fue eliminado.`})
 });
+
+/**
+ * @swagger
+ * /payments:
+ *  post:
+ *
+ */
 
 //Crear nuevos medios de pagos
 app.post('/payments',isLoggedIn, hasPrivileges, (req,res) => {
@@ -497,6 +561,13 @@ app.post('/payments',isLoggedIn, hasPrivileges, (req,res) => {
     let newIndex = paymentMethodList.findIndex(payments => payments.getCode() == code)
     
     res.json({"respuesta": `El método de pago ${code} ha sido agregado.`,"ID": `${newIndex}`})})
+
+/**
+ * @swagger
+ * /payments/{payment_id}:
+ *  put:
+ *
+ */
 
 //Editar medios de pago
 app.put('/payments/:payment_id',isLoggedIn, hasPrivileges, (req,res) => {
@@ -519,6 +590,13 @@ app.put('/payments/:payment_id',isLoggedIn, hasPrivileges, (req,res) => {
         res.json({"respuesta":`${modificaciones}`})
 });
 
+/**
+ * @swagger
+ * /payments/{payment_id}:
+ *  delete:
+ *
+ */
+
 //Borrar medios de pago
 app.delete('/payments/:payment_id',isLoggedIn, hasPrivileges, (req,res) => {
     if (!paymentMethodList[req.params.payment_id] || paymentMethodList[req.params.payment_id].isDeleted()){
@@ -529,10 +607,24 @@ app.delete('/payments/:payment_id',isLoggedIn, hasPrivileges, (req,res) => {
     res.json({"respuesta":`El método de pago con código ${codigo} ha sido borrado`})
 });
 
+/**
+ * @swagger
+ * /payments:
+ *  get:
+ *
+ */
+
 //Ver todos los medios de pago
 app.get('/payments',isLoggedIn, hasPrivileges, (req,res) => {
     res.json({paymentMethodList})
 });
+
+/**
+ * @swagger
+ * /user/{user_id}/orders/{order_number}:
+ *  get:
+ *
+ */
 
 //Ver todos los pedidos de un usuario como admin
 app.get('user/:user_id/orders/:order_number',isLoggedIn, hasPrivileges, orderStatus, (req,res) => {
@@ -549,4 +641,4 @@ app.listen(config.port, function () {
 
 //TODO: buscar bugs!
 //TODO: investigar como usar router para tener este archivo más organizado
-//Investigar ERROR / ERR
+//TODO: Investigar ERROR / ERR
