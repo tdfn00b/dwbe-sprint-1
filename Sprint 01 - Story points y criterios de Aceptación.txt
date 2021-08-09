@@ -1,5 +1,3 @@
-TOTAL DE PUNTOS HASTA AHORA = 6
-
 Puntos:
 Registro y Login - 6 total
 3 - [X] Los usuarios puedan crear una cuenta en la aplicación.
@@ -16,7 +14,7 @@ Productos - 14 total
 3 - [X] Los usuarios administradores puedan eliminar un producto.
 
 Documentación - 9 total
-5 - [] Tener la documentación de la API con Swagger
+5 - [X] Tener la documentación de la API con Swagger
 3 - [X] Tener el código de fuente en GitHub
 1 - [X] Tener el README.md con las instrucciones de instalación.
 

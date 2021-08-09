@@ -42,24 +42,6 @@ app.get('/',(req,res) =>{
     res.json({"respuesta":"Sprint Project 01 - v1.0.1"})
 })
 
-//Lista de Usuarios
-app.get('/users', (req, res) => {
-    //Solo para el desarrollo
-    res.json(userList);
-});
-
-//Lista de Productos
-app.get('/products', (req, res) => {
-    //Solo para el desarrollo
-    res.json(productList);
-});
-
-//Lista de logueados (tiene que ser solo 1)
-app.get('/login', (req, res) => {
-    //Solo para el desarrollo
-    res.json(logList);
-});
-
 /**
  * @swagger
  * /users/register:
@@ -71,7 +53,7 @@ app.get('/login', (req, res) => {
  *    parameters:
  *      - in: body
  *        name: usuario
- *        description: usuario  a crear
+ *        description: usuario a crear
  *        schema:
  *          type: object
  *          required:
@@ -219,8 +201,8 @@ app.post('/users/logout', (req,res) =>{
  * @swagger
  * /orders:
  *  post:
- *    summary: Creado de pedido.
- *    description : Creado de pedido.
+ *    summary: Creación de nuevo pedido.
+ *    description: Creación de nuevo pedido.
  *    consumes:
  *      - application/json
  *    parameters:
@@ -284,7 +266,7 @@ app.post('/orders', isLoggedIn,(req,res) => {
  *      - application/json
  *    parameters:
  *      - in: path
- *        name: order number
+ *        name: order_number
  *        required: true
  *        description: Número del pedido.
  *        schema:
@@ -382,10 +364,6 @@ app.put('/orders/:order_number', isLoggedIn, orderStatus, productExist, (req,res
     res.json({"respuesta": `El pedido ha sido modificado ${modificaciones}`})
 
 });
-//######################################################################################################################
-//######################################################################################################################
-//######################################################################################################################
-//######################################################################################################################
 /**
  * @swagger
  * /orders/{order_number}:
@@ -396,7 +374,7 @@ app.put('/orders/:order_number', isLoggedIn, orderStatus, productExist, (req,res
  *      - application/json
  *    parameters:
  *      - in: path
- *        name: order number
+ *        name: order_number
  *        required: true
  *        description: Número del pedido.
  *        schema:
@@ -439,7 +417,7 @@ app.delete('/orders/:order_number',isLoggedIn, orderStatus, (req,res) => {
  *      - application/json
  *    parameters:
  *      - in: path
- *        name: order number
+ *        name: order_number
  *        required: true
  *        description: Número del pedido.
  *        schema:
@@ -551,7 +529,7 @@ app.get('/orders/users/:user_id', isLoggedIn, (req, res) => {
  *      - application/json
  *    parameters:
  *      - in: path
- *        name: order number
+ *        name: order_number
  *        required: true
  *        description: Número del pedido.
  *        schema:
@@ -1008,7 +986,7 @@ app.get('/payments',isLoggedIn, hasPrivileges, (req,res) => {
 
 /**
  * @swagger
- * /user/{user_id}/orders/{order_number}:
+ *  /orders/users/{user_id}:
  *  get:
  *    summary: Ver todos los pedidos de un usuario.
  *    description : Muestra toda la lista de todos los pedidos en todos los estados del usuario seleccionado. Solo para administradores.
@@ -1017,13 +995,6 @@ app.get('/payments',isLoggedIn, hasPrivileges, (req,res) => {
  *    parameters:
  *      - in: path
  *        name: user_id
- *        required: true
- *        description: Número del pedido.
- *        schema:
- *          type: integer
- *          example: 4
- *      - in: path
- *        name: order_number
  *        required: true
  *        description: Número del pedido.
  *        schema:
@@ -1045,8 +1016,14 @@ app.get('/payments',isLoggedIn, hasPrivileges, (req,res) => {
  *       description: Debes iniciar sesión
  */
 
-app.get('user/:user_id/orders/:order_number',isLoggedIn, hasPrivileges, orderStatus, (req,res) => {
+app.get('orders/users/:user_id',isLoggedIn, hasPrivileges, orderStatus, (req,res) => {
     res.json(orderList[req.order_index])
+});
+
+
+//Lista de Productos
+app.get('/products', isLoggedIn, hasPrivileges, (req, res) => {
+    res.json(productList);
 });
 
 //Routeo de Swagger
