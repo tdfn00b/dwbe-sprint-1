@@ -209,7 +209,7 @@ app.post('/users/logout', (req,res) =>{
  *      - in: query
  *        name: id
  *        required: true
- *        description: Index del usuario logueado.
+ *        description: Indice del usuario logueado.
  *        schema:
  *          type: integer
  *          example: 4
@@ -275,7 +275,7 @@ app.post('/orders', isLoggedIn,(req,res) => {
  *      - in: query
  *        name: id
  *        required: true
- *        description: Index del usuario logueado.
+ *        description: Indice del usuario logueado.
  *        schema:
  *          type: integer
  *          example: 4
@@ -307,13 +307,13 @@ app.post('/orders', isLoggedIn,(req,res) => {
  *              example: 4
  *    responses:
  *      201:
- *       description: Pedido creado
+ *       description: El pedido ha sido modificado.
  *      401:
  *       description: No puede modificar el pedido.
  *      400:
- *       description: El pedido no se encuentra en la orden
+ *       description:El producto no se encuentra en el pedido.
  *      406:
- *       description: Su pedido fue rechazado
+ *       description: Su pedido fue rechazado.
  *      
  */
 
@@ -383,7 +383,7 @@ app.put('/orders/:order_number', isLoggedIn, orderStatus, productExist, (req,res
  *      - in: query
  *        name: id
  *        required: true
- *        description: Index del usuario logueado.
+ *        description: Índice del usuario logueado.
  *        schema:
  *          type: integer
  *          example: 4
@@ -426,14 +426,14 @@ app.delete('/orders/:order_number',isLoggedIn, orderStatus, (req,res) => {
  *      - in: query
  *        name: id
  *        required: true
- *        description: Index del usuario logueado.
+ *        description: Índice del usuario logueado.
  *        schema:
  *          type: integer
  *          example: 4
  *      - in: body
- *        name: Valores
+ *        name: newStatus
  *        required : false
- *        description: Valores a modificar de la orden seleccionada
+ *        description: Nuevo estado al cuál transicionar el estado del producto seleccionado.
  *        schema:
  *          type: object
  *          properties:
@@ -485,7 +485,7 @@ app.patch('/orders/:order_number',isLoggedIn, orderStatus,(req,res) => {
  *      - in: query
  *        name: id
  *        required: true
- *        description: Index del usuario logueado.
+ *        description: Indice del usuario logueado.
  *        schema:
  *          type: integer
  *          example: 4
@@ -529,7 +529,7 @@ app.get('/orders/users/:user_id', isLoggedIn, (req, res) => {
  *      - application/json
  *    parameters:
  *      - in: path
- *        name: order_number
+ *        name: order number
  *        required: true
  *        description: Número del pedido.
  *        schema:
@@ -538,13 +538,13 @@ app.get('/orders/users/:user_id', isLoggedIn, (req, res) => {
  *      - in: query
  *        name: id
  *        required: true
- *        description: Index del usuario logueado.
+ *        description: Indice del usuario logueado.
  *        schema:
  *          type: integer
  *          example: 4
  *    responses:
  *      200:
- *       description: El estado del pedido fue cambiado.
+ *       description: Petición realizada.
  *      400:
  *       description: No hay pedidos para mostrar
  *      403:
@@ -574,7 +574,7 @@ app.get('/orders/:order_number', isLoggedIn, orderStatus,(req,res)=>{
  *      - in: query
  *        name: id
  *        required: true
- *        description: Index del usuario logueado.
+ *        description: Indice del usuario logueado.
  *        schema:
  *          type: integer
  *          example: 0
@@ -602,6 +602,13 @@ app.get('/orders', isLoggedIn, hasPrivileges, (req, res) => {
  *    consumes:
  *      - application/json
  *    parameters:
+ *      - in: query
+ *        name: id
+ *        required: true
+ *        description: Indice del usuario logueado.
+ *        schema:
+ *          type: integer
+ *          example: 0
  *      - in: body
  *        name: producto
  *        description: producto a crear
@@ -669,7 +676,14 @@ app.post('/products',isLoggedIn, hasPrivileges, (req,res) => {
  *      - in: query
  *        name: id
  *        required: true
- *        description: Index del usuario logueado.
+ *        description: Indice del usuario logueado.
+ *        schema:
+ *          type: integer
+ *          example: 0
+ *      - in: query
+ *        name: id
+ *        required: true
+ *        description: Indice del usuario logueado.
  *        schema:
  *          type: integer
  *          example: 0
@@ -751,16 +765,16 @@ app.put('/products/:product_number',isLoggedIn, hasPrivileges, productExist, (re
  *      - application/json
  *    parameters:
  *      - in: path
- *        name: product number
+ *        name: product_number
  *        required: true
- *        description: Número del producto seleccionado para borrar..
+ *        description: Número del producto seleccionado para borrar.
  *        schema:
  *          type: integer
- *          example: 4
+ *          example: 2
  *      - in: query
  *        name: id
  *        required: true
- *        description: Index del usuario logueado.
+ *        description: Indice del usuario logueado.
  *        schema:
  *          type: integer
  *          example: 0
@@ -790,7 +804,7 @@ app.delete('/products/:product_number',isLoggedIn, hasPrivileges, productExist, 
  *      - in: query
  *        name: id
  *        required: true
- *        description: Index del usuario logueado.
+ *        description: Indice del usuario logueado.
  *        schema:
  *          type: integer
  *          example: 0
@@ -847,16 +861,16 @@ app.post('/payments',isLoggedIn, hasPrivileges, (req,res) => {
  *      - application/json
  *    parameters:
  *      - in: path
- *        name: payment ID
+ *        name: payment_id
  *        required: true
- *        description: Número del pedido.
+ *        description: Número índice del pedido.
  *        schema:
  *          type: integer
  *          example: 4
  *      - in: query
  *        name: id
  *        required: true
- *        description: Index del usuario logueado.
+ *        description: Indice del usuario logueado.
  *        schema:
  *          type: integer
  *          example: 0
@@ -926,13 +940,13 @@ app.put('/payments/:payment_id',isLoggedIn, hasPrivileges, (req,res) => {
  *      - in: query
  *        name: id
  *        required: true
- *        description: Index del usuario logueado.
+ *        description: Indice del usuario logueado.
  *        schema:
  *          type: integer
  *          example: 0
  *    responses:
  *      200:
- *       description: El método de pago ha sido agregado exitosamente.
+ *       description: El método de pago ha sido removido exitosamente.
  *      400:
  *       description: Acceso denegado
  *      401:
@@ -968,7 +982,7 @@ app.delete('/payments/:payment_id',isLoggedIn, hasPrivileges, (req,res) => {
  *      - in: query
  *        name: id
  *        required: true
- *        description: Index del usuario logueado.
+ *        description: Indice del usuario logueado.
  *        schema:
  *          type: integer
  *          example: 0
@@ -1003,7 +1017,7 @@ app.get('/payments',isLoggedIn, hasPrivileges, (req,res) => {
  *      - in: query
  *        name: id
  *        required: true
- *        description: Index del usuario logueado.
+ *        description: Indice del usuario logueado.
  *        schema:
  *          type: integer
  *          example: 0
