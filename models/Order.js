@@ -39,7 +39,7 @@ class Order {
     }
 
     removeProduct(product_index){    
-        this.orderProducts.splice(product_index)
+        this.orderProducts.splice(product_index, 1)
         this.setPrice()
     }
 

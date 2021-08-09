@@ -87,7 +87,7 @@ const productInOrder = (req,res,next) => {
     product_name = req.product.name
     index = orderList[req.order_index].orderProducts.findIndex(product => product.name == product_name)
     
-    if (index == undefined){
+    if (index == -1){
         return res.status(400).json({"respuesta":"El producto no se encuentra en la orden"})
     }
 

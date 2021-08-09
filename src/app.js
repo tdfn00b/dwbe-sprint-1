@@ -159,7 +159,7 @@ app.post('/orders/:order_number', isLoggedIn, orderStatus, productExist, (req,re
 });
 
 //Remover un producto del pedido.
-app.patch('/orders/:order_number',isLoggedIn, orderStatus, productExist, productInOrder, (req,res) => {
+app.delete('/orders/:order_number',isLoggedIn, orderStatus, productExist, productInOrder, (req,res) => {
     if (req.status == 100) {
         return res.send('Su pedido fue rechazado.')
     }
