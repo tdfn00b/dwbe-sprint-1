@@ -6,7 +6,7 @@ class User {
         this.email = email;
         this.phone_number = phone_number;
         this.address = address;
-        this.userID = userList.length
+        this.userID = userList.length;
         this.admin = false;
         this.deleted = false; //Tener en cuenta para chequear la existencia de usuarios.
     }
@@ -20,7 +20,7 @@ class User {
     }
 
     deleteUser(){
-        this.deleted = true
+        this.deleted = true;
     }
 
     isDeleted(){

@@ -27,7 +27,7 @@ Requerimientos Adicionales - 36 total
 8 - [-] Que los administradores puedan editar medios de pago.
 3 - [-] Que los administradores puedan borrar medios de pago.
 1 - [-] Que los administradores puedan ver todos los medios de pago.
-3 - [-] Que los usuarios puedan agregar una dirección de destino de su pedido.
+3 - [-] Que los usuarios puedan agregar una dirección de destino a su pedido.
 13 - [X] Que los usuarios puedan modificar su pedido mientras no lo hayan cerrado.
 2 - [X] Que los usuarios no puedan modificar su pedido una vez que lo hayan cerrado.
 

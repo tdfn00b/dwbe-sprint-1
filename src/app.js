@@ -146,11 +146,11 @@ app.post('/orders/:order_number', isLoggedIn, orderStatus, productExist, (req,re
 
     //Checks the current status of the order
     if (req.status == 100) {
-        return res.send('Su pedido fue rechazado.')
+        return res.json({"respuesta":'Su pedido fue rechazado.'})
     }
 
     if (req.status >= 2) {
-        return res.send('No puede modificar el pedido.')    
+        return res.json({"respuesta":'No puede modificar el pedido.'}) 
     }
 
     //Add the product to the order.
@@ -190,13 +190,12 @@ app.delete('/orders/:order_number',isLoggedIn, orderStatus, (req,res) => {
 app.patch('/orders/:order_number',isLoggedIn, orderStatus,(req,res) => {
     const {newStatus} = req.body;
     oldStatus = req.order.getStatus();
-
     if (req.order.status != newStatus){
-        if (user.isAdmin() || (newStatus == 2)) {
+        if (user.isAdmin() || newStatus == 2) {
             orderList[req.order_index].setStatus(newStatus);
             return res.json({"respuesta" : `El estado del pedido número ${req.order.orderNumber} fue cambiado de ${oldStatus} a ${orderList[req.order_index].getStatus()}`});
-        } else if (!user.isAdmin() && newStatus > 2) {
-            return res.status(403).json({"respuesta":"El usuario no tiene permisos para acceder a esta propiedad"})
+        } else {
+            return res.status(403).json({"respuesta":"El usuario no tiene permisos para realizar esta acción"})
         } 
     } else {
         return res.status(400).json({"respuesta":"El estado actual y el estado propuesto son iguales"})
