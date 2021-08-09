@@ -159,7 +159,7 @@ app.post('/orders/:order_number', isLoggedIn, orderStatus, productExist, (req,re
 });
 
 //Remover un producto del pedido.
-app.delete('/orders/:order_number',isLoggedIn, orderStatus, productExist, productInOrder, (req,res) => {
+app.put('/orders/:order_number',isLoggedIn, orderStatus, productExist, productInOrder, (req,res) => {
     if (req.status == 100) {
         return res.send('Su pedido fue rechazado.')
     }
@@ -173,20 +173,24 @@ app.delete('/orders/:order_number',isLoggedIn, orderStatus, productExist, produc
 });
 
 
-//Cancelar pedido
+//Cancelar como usuario un pedido
 app.delete('orders/:order_number',isLoggedIn, orderStatus, (req,res) => {
     //If the status of the order is already sended or more
-    //it's not possible to cancel the order as an User.
-    //privileges: 1 - usuario, 2 - manager, 3 - admin
-    if (req.user.getPrivileges() > 1){
-        //order status: 1 = Pendiente, 2 = Confirmado, 3 = En preparación, 4 = Enviado, 5 = Entregado, 100 = Rechazado
-        if (res.status >= 4) {
-            return res.send(`No es posible cancelar el pedido número ${res.order.orderNumber}.`)
-        } 
-    }
+    //it's not possible to cancel the order as an User.    
+    //order status: 1 = Pendiente, 2 = Confirmado, 3 = En preparación, 4 = Enviado, 5 = Entregado, 100 = Rechazado
+    if (req.status > 3) {
+        return res.status(400).json({"respuesta":`No es posible cancelar el pedido número ${req.order.orderNumber}. El pedido se encuentra ${req.status}`, "posibles estados":"1 = Pendiente, 2 = Confirmado, 3 = En preparación, 4 = Enviado, 5 = Entregado, 100 = Rechazado"})
+    };
+    
+    orderList[req.order_index].deleted = true;
+    res.json({"respuesta":'Su pedido fue cancelado.'});
+});
 
-    orderList[req.order_index].deleted = 1
-    res.send('Su pedido fue cancelado.')
+//Confirmar pedido 
+app.patch('/orders/:order_number',isLoggedIn, orderStatus,(req,res) => {
+    const {newStatus} = req.body;
+    orderList[req.order_index].setStatus(req.user, newStatus);
+    res.send('Su pedido fue confirmado');
 });
 
 //Ver historial de pedidos del usuario logueado
@@ -201,17 +205,19 @@ app.get('/orders', isLoggedIn, (req, res) => {
 
     //Check if the orders of the current user is empty
     if (userOrderList.length == 0){
-        return res.json({"respuesta" : `No hay ordenes para mostrar.`})
+        return res.status(444).json({"respuesta" : `No hay pedidos para mostrar.`})
     }
 
-    res.send(userOrderList)
+    res.json(userOrderList)
 });
 
-//Confirmar pedido 
-app.put('/orders/:order_number',isLoggedIn, orderStatus,(req,res) => {
-    const {newStatus} = req.body;
-    orderList[req.order_index].setStatus(req.user, newStatus);
-    res.send('Su pedido fue confirmado');
+//Ver una orden como usuario
+app.get('/orders/:order_id', isLoggedIn, orderStatus,(req,res)=>{
+    if (req.user.userID != req.order.user.userID){
+        return res.status(444).json({"respuesta": `No puede ver este pedido`})
+    }
+
+    res.json(orderList[req.order_index])
 });
 
 //Cambiar nombre de un producto, solo como administrador
