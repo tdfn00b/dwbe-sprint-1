@@ -21,18 +21,14 @@ class Order {
         this.orderPrice = newPrice;
     }
 
-    setStatus(user, newStatus){
-        if (this.status != newStatus){
-            if (user.isAdmin() || (newStatus <= 2)) {
-                this.status = newStatus;
-            } else if (!user.isAdmin() && newStatus > 2) {
-                console.log('El usuario no tiene permisos para acceder a esta propiedad')
-            } 
-        } else {
-            console.log(`El pedido ya está ${newStatus}`)
-        }
+    setStatus(newStatus){
+        this.status = newStatus;
     }
     
+    getStatus(){
+        return this.status;
+    }
+
     addProduct(product){
         this.orderProducts.push(product)
         this.setPrice()
@@ -64,6 +60,10 @@ class Order {
         } else {
             return true
         }
+    }
+
+    isDeleted(){
+        return this.deleted;
     }
 }
 

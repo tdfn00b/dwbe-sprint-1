@@ -23,6 +23,10 @@ class Product {
     getPrice(){
         return this.price;
     }
+
+    isDeleted(){
+        return this.deleted;
+    }
 }
 
 let productList = []

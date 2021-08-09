@@ -71,7 +71,7 @@ app.post('/users/register', (req, res) => {
 
     //Check if the email or used is already in the user list.
     if (userList.find(user => user.email == email || user.username == username)) {
-        return res.status(403).json({"respuesta" : "El nombre de usuario o email ya está registrado."});
+        return res.status(401).json({"respuesta" : "El nombre de usuario o email ya está registrado."});
     };
 
     //Create a new Object User
@@ -89,7 +89,7 @@ app.post('/users/login',(req, res) => {
 
     //Check if there is an user logged in.
     if (logList[0]){
-        return res.status(403).json({"respuesta":`Cierra la sesión actual para continuar.`})
+        return res.status(401).json({"respuesta":`Cierra la sesión actual para continuar.`})
     }
 
     //Find a match for the user email or username in the registered users list.
@@ -174,7 +174,7 @@ app.put('/orders/:order_number',isLoggedIn, orderStatus, productExist, productIn
 
 
 //Cancelar como usuario un pedido
-app.delete('orders/:order_number',isLoggedIn, orderStatus, (req,res) => {
+app.delete('/orders/:order_number',isLoggedIn, orderStatus, (req,res) => {
     //If the status of the order is already sended or more
     //it's not possible to cancel the order as an User.    
     //order status: 1 = Pendiente, 2 = Confirmado, 3 = En preparación, 4 = Enviado, 5 = Entregado, 100 = Rechazado
@@ -186,11 +186,22 @@ app.delete('orders/:order_number',isLoggedIn, orderStatus, (req,res) => {
     res.json({"respuesta":'Su pedido fue cancelado.'});
 });
 
-//Confirmar pedido 
+//Cambiar estado de pedido
 app.patch('/orders/:order_number',isLoggedIn, orderStatus,(req,res) => {
     const {newStatus} = req.body;
-    orderList[req.order_index].setStatus(req.user, newStatus);
-    res.send('Su pedido fue confirmado');
+    oldStatus = req.order.getStatus();
+
+    if (req.order.status != newStatus){
+        if (user.isAdmin() || (newStatus == 2)) {
+            orderList[req.order_index].setStatus(newStatus);
+            return res.json({"respuesta" : `El estado del pedido número ${req.order.orderNumber} fue cambiado de ${oldStatus} a ${orderList[req.order_index].getStatus()}`});
+        } else if (!user.isAdmin() && newStatus > 2) {
+            return res.status(403).json({"respuesta":"El usuario no tiene permisos para acceder a esta propiedad"})
+        } 
+    } else {
+        return res.status(400).json({"respuesta":"El estado actual y el estado propuesto son iguales"})
+    }
+    
 });
 
 //Ver historial de pedidos del usuario logueado
@@ -199,7 +210,7 @@ app.get('/orders', isLoggedIn, (req, res) => {
     
     //Check in the orders list if the user has any order in any status
     ordersFromUser = orderList.forEach((order) => {
-        if (order.getUserId() == req.user.userID) {
+        if (order.getUserId() == req.user.userID && !order.deleted) {
             userOrderList.push(order)
         }});
 
@@ -212,7 +223,7 @@ app.get('/orders', isLoggedIn, (req, res) => {
 });
 
 //Ver una orden como usuario
-app.get('/orders/:order_id', isLoggedIn, orderStatus,(req,res)=>{
+app.get('/orders/:order_number', isLoggedIn, orderStatus,(req,res)=>{
     if (req.user.userID != req.order.user.userID){
         return res.status(444).json({"respuesta": `No puede ver este pedido`})
     }

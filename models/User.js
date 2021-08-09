@@ -16,11 +16,15 @@ class User {
     }
 
     isAdmin(){
-        return this.privilege;
+        return this.admin;
     }
 
     deleteUser(){
         this.deleted = true
+    }
+
+    isDeleted(){
+        return this.deleted;
     }
 }
 
