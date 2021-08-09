@@ -4,20 +4,16 @@ const {Product, productList} = require('../models/Product')
 const {Order, orderList} = require('../models/Order')
 const {PaymentMethod, paymentMethodList} = require('../models/PaymentMethod')
 
-//Creo usuarios
-let admin = new User("admin","admin", null, null, "superadmin@supermail.com", null);
-let user1 = new User("tdfn00b","pokemon","David Maximiliano Guerrero","+5492964609475","guerrerodavidm@gmail.com", "Calle falsa 123")
-let user2 = new User("felipemoralesquerol","felpe1234","Felipe Morales","12345678","felipe.morales.querol@gmail.com", "Calle verdadera 123")
-let user3 = new User("juancit0","contraseña","Juancito Perez","123213214","juancitoperez@gmail.com", "Mi casa 321")
 
-//Cambio los privilegios 
-admin.setAdmin(true)
+//Creo y agrego usuario a la lista de usuarios
+userList.push(new User("admin","admin", null, null, "superadmin@supermail.com", null));
+userList.push(new User("tdfn00b","pokemon","David Maximiliano Guerrero","+5492964609475","guerrerodavidm@gmail.com", "Calle falsa 123"));
+userList.push(new User("felipemoralesquerol","felpe1234","Felipe Morales","12345678","felipe.morales.querol@gmail.com", "Calle verdadera 123"));
+userList.push(new User("juancit0","contraseña","Juancito Perez","123213214","juancitoperez@gmail.com", "Mi casa 321"));
 
-//Agrego usuario a la lista de usuarios
-userList.push(admin);
-userList.push(user1);
-userList.push(user2);
-userList.push(user3);
+//Cambio los privilegios del admin
+let adminAcc = userList.find(user => user.username == "admin");
+adminAcc.setAdmin(true)
 
 //Creo y agrego productos a la lista de productos
 productList.push(new Product("Panqueque de manzana", "Panqueques de manzana verde con caramelo", 100, true))
@@ -34,9 +30,9 @@ paymentMethodList.push(efectivo)
 paymentMethodList.push(debito)
 
 //Creo ordenes para cada usuario
-let order1 = new Order(user1, efectivo, user1.address);
-let order2 = new Order(user2, efectivo, user2.address);
-let order3 = new Order(user3, debito, user3.address);
+let order1 = new Order(userList[1], efectivo, userList[1].address);
+let order2 = new Order(userList[2], efectivo, userList[2].address);
+let order3 = new Order(userList[3], debito, userList[3].address);
 
 //Agrego productos a las ordenes
 order1.addProduct(productList[0])

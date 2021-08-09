@@ -7,18 +7,6 @@ const isLoggedIn = (req,res,next) => {
     if (logList[0] == undefined) {
         return res.status(403).json({"respuesta":"Debes iniciar sesión."})
     }
-    
-    /*  
-    //#### Search in the Database for the user Object by ID #### 
-    //       |
-    //       v
-    //We are not doing this, assuming that the request already knows the ID of the user.
-
-    
-  
-    //IF there is an user logged it must be in the database, therefore it should NEVER return -1
-    index = userList.findIndex(user => user.username == user_id);
-    */
 
     //Parsing the index from the QUERY of the request.
     let index = parseInt(req.query.id);

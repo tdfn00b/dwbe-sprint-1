@@ -4,7 +4,6 @@ const config = require('../config')
 //Importación de módulos
 const express = require('express');
 const morgan = require('morgan');
-/*
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUI = require('swagger-ui-express')
 const swaggerOptions = {
@@ -17,7 +16,7 @@ const swaggerOptions = {
     apis: ['./app.js'],
 };
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
-*/
+
 
 // Importación de clases, middlewares y listas.
 const {User} = require('../models/User')
@@ -36,7 +35,7 @@ let {logList} = require('../models/logList')
 const app = express();
 app.use(express.json());
 app.use(morgan('dev')); 
-//app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 //Creación de ENDPOINTS
 
@@ -57,13 +56,6 @@ app.get('/login', (req, res) => {
     //Solo para el desarrollo
     res.json(logList);
 });
-
-/*
-//Lista de Ordenes
-app.get('/orders', isLoggedIn, hasPrivileges,(req, res) => {
-    res.json(orderList);
-});
-*/
 
 //Registro de usuario
 app.post('/users/register', (req, res) => {
@@ -129,10 +121,10 @@ app.post('/orders/', isLoggedIn,(req,res) => {
     }
 
     //Parse information from the request.
-    const {paymenthMethod} = req.body
-
+    const {paymentMethod} = req.body
+    newPayment = paymentMethodList[paymentMethod] 
     //Create a new Object Order with the user and it's address and add it to the orders list.
-    newOrder = new Order(req.user, paymenthMethod, req.user.address)
+    newOrder = new Order(req.user, newPayment, req.user.address)
     orderList.push(newOrder);
 
     //Get the ID of the new Order to get a reference.
@@ -141,26 +133,42 @@ app.post('/orders/', isLoggedIn,(req,res) => {
     res.json({"respuesta":`El usuario ${req.user.username} ha comenzado un pedido.`,"ID":`${orderNumber}`})
 });
 
-//TODO: Combinar este app.post('/orders/:order_number' con app.put('/orders/:order_number'
-//Agregar un producto a un pedido no confirmado 
+//Modifica un pedido no confirmado no confirmado 
 app.post('/orders/:order_number', isLoggedIn, orderStatus, productExist, (req,res) => {
     //1 = Pendiente, 2 = Confirmado, 3 = En preparación, 4 = Enviado, 5 = Entregado, 100 = Rechazado
-
     //Checks the current status of the order
     if (req.status == 100) {
         return res.json({"respuesta":'Su pedido fue rechazado.'})
     }
-
+    
     if (req.status >= 2) {
         return res.json({"respuesta":'No puede modificar el pedido.'}) 
     }
+    
+    const {paymentMethod, address, productNumber} = req.body
+    let modificaciones = ""
+
+    if (paymentMethod != undefined){
+        newPayment = paymentMethodList[paymentMethod];
+        if (newPayment) {
+        orderList[req.order_index].paymentMethod = newPayment;
+        modificaciones += "Método de pago modificado. "
+        }
+    }
+    if (address != undefined){
+        orderList[req.order_index].address = address;
+        modificaciones += "Dirección de envio modificada. "
+    }
+    if (productNumber != undefined){
+        orderList[req.order_index].addProduct(req.product);
+        modificaciones += "Lista de productos modificada. "
+    }
 
     //Add the product to the order.
-    orderList[req.order_index].addProduct(req.product)
-    res.json({"respuesta":`El producto ${req.product.name} fue agregado`})
+    res.json({"respuesta": `El pedido ha sido modificado ${modificaciones}`})
 });
 
-//Remover un producto del pedido.
+//Disminuye la cantidad de un producto del pedido hasta que este no se encuentre dentro del pedido.
 app.put('/orders/:order_number',isLoggedIn, orderStatus, productExist, productInOrder, (req,res) => {
     if (req.status == 100) {
         return res.send('Su pedido fue rechazado.')
@@ -205,12 +213,12 @@ app.patch('/orders/:order_number',isLoggedIn, orderStatus,(req,res) => {
     
 });
 
-//Ver historial de pedidos del usuario logueado
+//Ver historial de pedidos del usuario logueado o todos
 app.get('/orders', isLoggedIn, (req, res) => {
-    userOrderList = [];
-    
+    let userOrderList = [];
+
     //Check in the orders list if the user has any order in any status
-    ordersFromUser = orderList.forEach((order) => {
+    let ordersFromUser = orderList.forEach((order) => {
         if (order.getUserId() == req.user.userID && !order.deleted) {
             userOrderList.push(order)
         }});
@@ -225,8 +233,11 @@ app.get('/orders', isLoggedIn, (req, res) => {
 
 //Ver una orden como usuario o admin
 app.get('/orders/:order_number', isLoggedIn, orderStatus,(req,res)=>{
-    if (req.user.userID != req.order.user.userID || !req.user.isAdmin()){
-        return res.status(444).json({"respuesta": `No puede ver este pedido`})
+    if (req.user.isAdmin()){
+        return res.json(orderList[req.order_index]);
+    }
+    if (req.user.userID != req.order.user.userID){
+        return res.status(444).json({"respuesta": `No puede ver este pedido`});
     }
 
     res.json(orderList[req.order_index])
@@ -346,6 +357,6 @@ app.listen(config.port, function () {
     console.log(`Servidor iniciado. Escuchando el puerto ${config.port}!`);
 });
 
-
-//TODO investigar como usar router para tener este archivo más organizado
+//TODO: buscar bugs!
+//TODO: investigar como usar router para tener este archivo más organizado
 //Investigar ERROR / ERR
