@@ -278,8 +278,9 @@ app.put('/products/:product_number',isLoggedIn, hasPrivileges, productExist, (re
 });
 
 //Eliminar producto
-app.delete('/products/:product_number',isLoggedIn, hasPrivileges, (req,res) => {
-
+app.delete('/products/:product_number',isLoggedIn, hasPrivileges, productExist, (req,res) => {
+    productList[req.product_index].deleteProduct()
+    res.json({"respuesta":`El producto ${req.product.name} fue eliminado.`})
 });
 
 //Cambiar nombre de un producto, solo como administrador

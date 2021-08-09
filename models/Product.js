@@ -39,6 +39,10 @@ class Product {
     isDeleted(){
         return this.deleted;
     }
+
+    deleteProduct(){
+        this.deleted = true;
+    }
 }
 
 let productList = []

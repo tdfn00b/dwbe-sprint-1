@@ -11,14 +11,14 @@ Pedidos - 11 total
 5 - [X] Los administradores puedan ver todos los pedidos y cambiar el estado de los mismos.
 
 Productos - 14 total
-3 - [-] Los usuarios administradores puedan dar de alta nuevos productos.
-8 - [-] Los usuarios administradores puedan editar un producto.
-3 - [-] Los usuarios administradores puedan eliminar un producto.
+3 - [X] Los usuarios administradores puedan dar de alta nuevos productos.
+8 - [X] Los usuarios administradores puedan editar un producto.
+3 - [X] Los usuarios administradores puedan eliminar un producto.
 
 Documentación - 9 total
 5 - [] Tener la documentación de la API con Swagger
-3 - [] Tener el código de fuente en GitHub
-1 - [] Tener el README.md con las instrucciones de instalación.
+3 - [X] Tener el código de fuente en GitHub
+1 - [X] Tener el README.md con las instrucciones de instalación.
 
 Requerimientos Adicionales - 36 total
 3 - [X] Que no hayan emails duplicados en el registro
@@ -43,12 +43,12 @@ Los estados mínimos de los pedidos deben ser:
 
 [X] Un usuario debe poder realizar un pedido, y asignar uno o más productos a éste.
 
-Cuando un usuario edita un pedido debe validar:
+Cuando un usuario edita un pedido debe:
     [X] poder cambiar la cantidad de un producto seleccionado.
     [-] poder eliminar un producto seleccionado.
     [X] poder agregar un producto nuevo.
     [X] no debe poder editar el nombre y precio de un producto.
 
 Cuando un administrador edita un producto debe:
-    [-] poder cambiar el nombre del producto.
-    [-] poder cambiar el precio del producto.
+    [X] poder cambiar el nombre del producto.
+    [X] poder cambiar el precio del producto.
